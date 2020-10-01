@@ -3,7 +3,7 @@
 #include "Module.h"
 
 // TODO 0: Uncomment this line to enable the usage of ModuleTaskManager
-//#define USE_TASK_MANAGER
+#define USE_TASK_MANAGER
 
 struct Texture;
 
