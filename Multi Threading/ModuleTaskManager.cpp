@@ -1,4 +1,5 @@
 #include "ModuleTaskManager.h"
+//#include <Windows.h>
 
 
 void ModuleTaskManager::threadMain()
@@ -10,6 +11,9 @@ void ModuleTaskManager::threadMain()
 		// - Retrieve a task from scheduledTasks
 		// - Execute it
 		// - Insert it into finishedTasks
+		
+		//Check if it works
+		//Sleep(1000);
 		{
 			std::unique_lock<std::mutex> lock(mtx);
 			while (scheduledTasks.empty())
@@ -42,13 +46,11 @@ bool ModuleTaskManager::init()
 bool ModuleTaskManager::update()
 {
 	// TODO 4: Dispatch all finished tasks to their owner module (use Module::onTaskFinished() callback)
+	while (!finishedTasks.empty())
 	{
 		std::unique_lock<std::mutex> lock(mtx);
-		while(!finishedTasks.empty())
-		{
-			finishedTasks.front()->owner->onTaskFinished(finishedTasks.front());
-			finishedTasks.pop();
-		}
+		finishedTasks.front()->owner->onTaskFinished(finishedTasks.front());
+		finishedTasks.pop();
 	}
 	return true;
 }
@@ -56,12 +58,13 @@ bool ModuleTaskManager::update()
 bool ModuleTaskManager::cleanUp()
 {
 	// TODO 5: Notify all threads to finish and join them
+	exitFlag = true;
+	event.notify_all();
+
 	for (int i = 0; i < MAX_THREADS; ++i)
 	{
 		threads[i].join();
 	}
-
-	exitFlag = true;
 
 	return true;
 }
@@ -74,7 +77,7 @@ void ModuleTaskManager::scheduleTask(Task *task, Module *owner)
 	{
 		std::unique_lock<std::mutex> lock(mtx);
 		scheduledTasks.push(task);
-	}
 
-	event.notify_one();
+		event.notify_one();
+	}
 }
