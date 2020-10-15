@@ -1,6 +1,8 @@
 #include "ModuleTaskManager.h"
 //#include <Windows.h>
 
+// Alex Morales Garcia and Alejandro París Gómez
+
 
 void ModuleTaskManager::threadMain()
 {
