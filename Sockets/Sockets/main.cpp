@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 	int port = 8000;
 	SOCKET s = socket(AF_INET, SOCK_DGRAM, 0);
 	const char* msg = "ping";
-	char msg_recieved;
+	char msg_recieved[MAX_BUFFER_SIZE];
 	int res = 0;
 
 	printf("Esto es el cliente UDP!\n");
@@ -28,14 +28,14 @@ int main(int argc, char** argv)
 
 		// Recieve message from server
 		int size = sizeof(bindAddr);
-		res = recvfrom(s, &msg_recieved, sizeof(char*), 0, (sockaddr*)&bindAddr, &size);
+		res = recvfrom(s, msg_recieved, MAX_BUFFER_SIZE, 0, (sockaddr*)&bindAddr, &size);
 
 		if (res == SOCKET_ERROR)
 			printWSErrorAndExit("Message not recieved!");
 		else
 		{
-			printf_s(&msg_recieved);
-			printf_s("\n");
+			msg_recieved[res] = '\0';
+			printf_s("%s\n", msg_recieved);
 			Sleep(1000);
 		}
 	}
