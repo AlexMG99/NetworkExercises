@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	while (true)
 	{
 		// Send message to server
-		res = send(s, msg, sizeof(msg), 0);
+		res = send(s, msg, strlen(msg), 0);
 
 		// Recieve message from server
 		res = recv(s, msg_recieved, MAX_BUFFER_SIZE, 0);

@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 		}
 
 		// Send message to client
-		res = send(s1, msg, sizeof(msg), 0);
+		res = send(s1, msg, strlen(msg), 0);
 		if (res == SOCKET_ERROR)
 			printWSErrorAndExit("Message don't send!");
 	}
