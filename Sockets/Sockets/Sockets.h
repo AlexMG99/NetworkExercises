@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #define MAX_BUFFER_SIZE 1024
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <Windows.h>
