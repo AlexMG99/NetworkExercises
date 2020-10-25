@@ -6,10 +6,10 @@ int main(int argc, char** argv)
 	int res = 0;
 	int port = 8000;
 	SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
-	const char* msg = "pong";
+	const char* msg = "Sasuukeeeeeeee";
 	char msg_recieved[MAX_BUFFER_SIZE];
 
-	printf("Esto es el server UDP!\n");
+	printf("Esto es el server TCP!\n");
 
 	sockaddr_in bindAddr;
 	bindAddr.sin_family = AF_INET;
@@ -23,11 +23,20 @@ int main(int argc, char** argv)
 		printWSErrorAndExit("Socket error! Not binded correctly");
 	}
 
+	res = listen(s, 1);
+
+	if (res == SOCKET_ERROR)
+	{
+		printWSErrorAndExit("Socket error! Not listened correctly");
+	}
+
+	int len = sizeof(bindAddr);
+	SOCKET s1 = accept(s, (sockaddr*)&bindAddr, &len);
+
 	while (true)
 	{
 		// Recieve message from client
-		int size = sizeof(bindAddr);
-		res = recvfrom(s, msg_recieved, MAX_BUFFER_SIZE, 0, (sockaddr*)&bindAddr, &size);
+		res = recv(s1, msg_recieved, MAX_BUFFER_SIZE, 0);
 
 		if (res == SOCKET_ERROR)
 			printWSErrorAndExit("Message not recieved!");
@@ -39,13 +48,14 @@ int main(int argc, char** argv)
 		}
 
 		// Send message to client
-		res = sendto(s, msg, sizeof(msg), 0, (sockaddr*)(&bindAddr), sizeof(bindAddr));
+		res = send(s1, msg, sizeof(msg), 0);
 		if (res == SOCKET_ERROR)
 			printWSErrorAndExit("Message don't send!");
 	}
 
 
 	closesocket(s);
+	closesocket(s1);
 	system("pause");
 	return 0;
 }
