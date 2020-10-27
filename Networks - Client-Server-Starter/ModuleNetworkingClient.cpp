@@ -4,15 +4,32 @@
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
 {
 	playerName = pplayerName;
+	playerName += '\0';
 
 	// TODO(jesus): TCP connection stuff
 	// - Create the socket
 	// - Create the remote address object
 	// - Connect to the remote address
 	// - Add the created socket to the managed list of sockets using addSocket()
+	// - If everything was ok... change the state
 
-	// If everything was ok... change the state
-	state = ClientState::Start;
+	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+	sockaddr_in remoteAddr;
+	remoteAddr.sin_family = AF_INET;
+	remoteAddr.sin_port = htons(serverPort);
+	inet_pton(AF_INET, serverAddressStr, &remoteAddr.sin_addr);
+
+	int len = sizeof(remoteAddr);
+	int result = connect(clientSocket, (sockaddr*)&remoteAddr, len);
+
+	if (result == SOCKET_ERROR)
+		reportError("Socket not connected correctly :_)");
+	else
+	{
+		addSocket(clientSocket);
+		state = ClientState::Start;
+	}
 
 	return true;
 }
@@ -27,6 +44,12 @@ bool ModuleNetworkingClient::update()
 	if (state == ClientState::Start)
 	{
 		// TODO(jesus): Send the player name to the server
+		int result = send(clientSocket, playerName.c_str(), playerName.size(), 0);
+
+		if (result == SOCKET_ERROR)
+			reportError("Message not sended >//<");
+		else
+			state = ClientState::Logging;
 	}
 
 	return true;

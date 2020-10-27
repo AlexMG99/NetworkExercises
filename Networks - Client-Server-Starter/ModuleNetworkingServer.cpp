@@ -16,6 +16,25 @@ bool ModuleNetworkingServer::start(int port)
 	// - Enter in listen mode
 	// - Add the listenSocket to the managed list of sockets using addSocket()
 
+	listenSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+	sockaddr_in bindAddr;
+	bindAddr.sin_family = AF_INET;
+	bindAddr.sin_port = htons(port);
+	bindAddr.sin_addr.S_un.S_addr = INADDR_ANY;
+
+	int result = bind(listenSocket, (const struct sockaddr*)&bindAddr, sizeof(bindAddr));
+
+	if (result == SOCKET_ERROR)
+		reportError("Socket not binded correctly the listen Socket ole");
+
+	result = listen(listenSocket, 1);
+
+	if (result == SOCKET_ERROR)
+		reportError("Socket not listened correctly emoji llorar :(");
+
+	addSocket(listenSocket);
+
 	state = ServerState::Listening;
 
 	return true;

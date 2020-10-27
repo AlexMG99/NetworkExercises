@@ -1,5 +1,6 @@
 #include "Networks.h"
 #include "ModuleNetworking.h"
+#include <list>
 
 
 static uint8 NumModulesUsingWinsock = 0;
@@ -72,6 +73,81 @@ bool ModuleNetworking::preUpdate()
 	// connected socket to the managed list of sockets.
 	// On recv() success, communicate the incoming data received to the
 	// subclass (use the callback onSocketReceivedData()).
+
+	// New socket set
+	fd_set readfds;
+	FD_ZERO(&readfds);
+
+	// Fill the set
+	for (auto s : sockets) {
+		FD_SET(s, &readfds);
+	}
+
+	// Timeout (return immediately)
+	struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	// Select (check for readability)
+	int res = select(0, &readfds, nullptr, nullptr, &timeout);
+	if (res == SOCKET_ERROR) {
+		reportError("select 4 read");
+	}
+
+	// Fill this array with disconnected sockets
+	std::list<SOCKET> disconnectedSockets;
+
+	// Read selected sockets
+	for (auto s : sockets)
+	{
+		if (FD_ISSET(s, &readfds)) {
+			if (isListenSocket(s)) { // Is the server socket
+				sockaddr_in bindAddr;
+				//bindAddr.sin_family = AF_INET;
+				//bindAddr.sin_addr.S_un.S_addr = INADDR_ANY;
+				
+				// Accept stuff
+				int len = sizeof(bindAddr);
+				SOCKET s1 = accept(s, (sockaddr*)&bindAddr, &len);
+				if (s1 != SOCKET_ERROR)
+				{
+					onSocketConnected(s1, bindAddr);
+					addSocket(s1);
+				}
+				else
+					reportError("Server Socket not accepted");
+			}
+			else { // Is a client socket
+				// Recv stuff
+				sockaddr_in bindAddr;
+				//bindAddr.sin_family = AF_INET;
+				//bindAddr.sin_addr.S_un.S_addr = INADDR_ANY;
+
+				// Accept stuff
+				int len = sizeof(bindAddr);
+				int result = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
+				if (result != SOCKET_ERROR)
+					onSocketReceivedData(s, incomingDataBuffer);
+				else if (result <= 0)
+				{
+					onSocketDisconnected(s);
+					disconnectedSockets.push_back(s);
+				}
+				else
+					reportError("Client Socket not accepted");
+			}
+		}
+	}
+
+	for (auto it_sock = sockets.begin(); it_sock != sockets.end(); ++it_sock)
+	{
+		if ((std::find(disconnectedSockets.begin(), disconnectedSockets.end(), (*it_sock))) != disconnectedSockets.end())
+		{
+			sockets.erase(it_sock);
+			break;
+		}
+	}
+
 
 	// TODO(jesus): handle disconnections. Remember that a socket has been
 	// disconnected from its remote end either when recv() returned 0,
