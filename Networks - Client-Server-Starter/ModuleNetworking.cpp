@@ -5,8 +5,6 @@
 
 static uint8 NumModulesUsingWinsock = 0;
 
-
-
 void ModuleNetworking::reportError(const char* inOperationDesc)
 {
 	LPVOID lpMsgBuf;
@@ -128,13 +126,12 @@ bool ModuleNetworking::preUpdate()
 				int result = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
 				if (result != SOCKET_ERROR)
 					onSocketReceivedData(s, incomingDataBuffer);
-				else if (result <= 0)
+				else
 				{
 					onSocketDisconnected(s);
 					disconnectedSockets.push_back(s);
-				}
-				else
 					reportError("Client Socket not accepted");
+				}
 			}
 		}
 	}
