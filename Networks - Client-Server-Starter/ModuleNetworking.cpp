@@ -117,21 +117,18 @@ bool ModuleNetworking::preUpdate()
 			}
 			else { // Is a client socket
 				// Recv stuff
-				sockaddr_in bindAddr;
-				//bindAddr.sin_family = AF_INET;
-				//bindAddr.sin_addr.S_un.S_addr = INADDR_ANY;
 
 				// Accept stuff
-				int len = sizeof(bindAddr);
 				int result = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
-				if (result != SOCKET_ERROR)
-					onSocketReceivedData(s, incomingDataBuffer);
-				else
+				if (result == SOCKET_ERROR || result == 0)
 				{
 					onSocketDisconnected(s);
 					disconnectedSockets.push_back(s);
 					reportError("Client Socket not accepted");
 				}
+				else
+					onSocketReceivedData(s, incomingDataBuffer);
+				
 			}
 		}
 	}
