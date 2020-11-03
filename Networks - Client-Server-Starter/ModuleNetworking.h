@@ -33,7 +33,6 @@ private:
 	virtual void onSocketDisconnected(SOCKET s) = 0;
 
 
-
 protected:
 
 	std::vector<SOCKET> sockets;

@@ -23,6 +23,7 @@ enum class MessageType
 {
 	Default,
 	Info,
+	Message,
 	Warning,
 	Error
 };

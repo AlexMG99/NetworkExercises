@@ -1,10 +1,14 @@
+#include "Colors.h"
 #include "ModuleNetworkingClient.h"
-
+#include <random>
 
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
 {
 	playerName = pplayerName;
 	playerName += '\0';
+
+	//TODO: Check colors
+	//colorName = colors[(rand() % (MAX_COLORS - 1))];
 
 	// TODO(jesus): TCP connection stuff
 	// - Create the socket
@@ -81,7 +85,11 @@ bool ModuleNetworkingClient::gui()
 				ImGui::Text("%s", line.second.c_str());
 				break;
 			case MessageType::Info:
-				ImGui::TextColored(ImVec4(255, 255, 0, 255), "%s", line.second.c_str());
+				ImGui::TextColored(Yellow, "%s", line.second.c_str());
+				break;
+			case MessageType::Message:
+				ImGui::TextColored(colorName, "%s: ", playerName.c_str()); ImGui::SameLine();
+				ImGui::TextColored(White, "%s", line.second.c_str());
 				break;
 			default:
 				break;

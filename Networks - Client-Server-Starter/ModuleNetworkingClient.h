@@ -1,6 +1,9 @@
 #pragma once
 
 #include "ModuleNetworking.h"
+
+//TODO: Remove includes
+#include "imgui/imgui.h"
 #include <map>
 
 class ModuleNetworkingClient : public ModuleNetworking
@@ -57,6 +60,7 @@ private:
 	SOCKET clientSocket = INVALID_SOCKET;
 
 	std::string playerName;
+	ImVec4 colorName = ImVec4(255, 255, 255, 255);
 	std::map<MessageType, std::string> fuckingChat;
 };
 
