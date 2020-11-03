@@ -27,15 +27,18 @@ bool ModuleNetworkingServer::start(int port)
 
 	if (result == SOCKET_ERROR)
 		reportError("Socket not binded correctly the listen Socket ole");
+	else
+	{
+		result = listen(listenSocket, 1);
 
-	result = listen(listenSocket, 1);
-
-	if (result == SOCKET_ERROR)
-		reportError("Socket not listened correctly emoji llorar :(");
-
-	addSocket(listenSocket);
-
-	state = ServerState::Listening;
+		if (result == SOCKET_ERROR)
+			reportError("Socket not listened correctly emoji llorar :(");
+		else
+		{
+			addSocket(listenSocket);
+			state = ServerState::Listening;
+		}
+	}
 
 	return true;
 }
@@ -106,6 +109,13 @@ void ModuleNetworkingServer::onSocketConnected(SOCKET socket, const sockaddr_in 
 	connectedSocket.socket = socket;
 	connectedSocket.address = socketAddress;
 	connectedSockets.push_back(connectedSocket);
+
+	// Send message of connecting
+	/*OutputMemoryStream message;
+	message << ClientMessage::Welcome;
+	message << "Hola";
+
+	sendPacket(message, socket);*/
 }
 
 void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
@@ -126,7 +136,6 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 				connectedSocket.playerName = playerName;
 			}
 		}
-
 	}
 }
 

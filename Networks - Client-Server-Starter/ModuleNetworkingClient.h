@@ -46,7 +46,8 @@ private:
 	{
 		Stopped,
 		Start,
-		Logging
+		Logging,
+		Logged
 	};
 
 	ClientState state = ClientState::Stopped;
@@ -55,5 +56,6 @@ private:
 	SOCKET clientSocket = INVALID_SOCKET;
 
 	std::string playerName;
+	std::vector<std::string> fuckingChat;
 };
 

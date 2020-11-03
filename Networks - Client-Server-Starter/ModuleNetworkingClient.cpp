@@ -74,6 +74,11 @@ bool ModuleNetworkingClient::gui()
 
 		ImGui::Text("%s connected to the server...", playerName.c_str());
 
+		for (auto line : fuckingChat)
+		{
+			ImGui::Text("%s", line.c_str());
+		}
+
 		ImGui::End();
 	}
 
@@ -82,6 +87,20 @@ bool ModuleNetworkingClient::gui()
 
 void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)
 {
+	ClientMessage clientMessage;
+	packet >> clientMessage;
+
+	// Set the player name of the corresponding connected socket proxy
+	if (clientMessage == ClientMessage::Hello)
+	{
+		packet >> playerName;
+	}
+	else if (clientMessage == ClientMessage::Welcome)
+	{
+		std::string welcomeMessage;
+		packet >> welcomeMessage;
+		fuckingChat.push_back(
+	}
 	state = ClientState::Stopped;
 }
 

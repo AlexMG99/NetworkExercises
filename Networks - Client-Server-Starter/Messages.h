@@ -5,7 +5,13 @@
 
 enum class ClientMessage
 {
-	Hello
+	Hello,
+	Welcome,
+	Help,
+	Ban,
+	Kick,
+	Whisper,
+	Goodbye
 };
 
 enum class ServerMessage
