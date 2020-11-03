@@ -71,12 +71,22 @@ bool ModuleNetworkingClient::gui()
 		Texture *tex = App->modResources->client;
 		ImVec2 texSize(400.0f, 400.0f * tex->height / tex->width);
 		ImGui::Image(tex->shaderResource, texSize);
-
 		ImGui::Text("%s connected to the server...", playerName.c_str());
 
 		for (auto line : fuckingChat)
 		{
-			ImGui::Text("%s", line.c_str());
+			switch (line.first)
+			{
+			case MessageType::Default:
+				ImGui::Text("%s", line.second.c_str());
+				break;
+			case MessageType::Info:
+				ImGui::TextColored(ImVec4(255, 255, 0, 255), "%s", line.second.c_str());
+				break;
+			default:
+				break;
+			}
+			
 		}
 
 		ImGui::End();
@@ -99,9 +109,10 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	{
 		std::string welcomeMessage;
 		packet >> welcomeMessage;
-		fuckingChat.push_back(
+		MessageType type;
+		packet >> type;
+		fuckingChat.insert(std::pair<MessageType,std::string>(type, welcomeMessage));
 	}
-	state = ClientState::Stopped;
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)

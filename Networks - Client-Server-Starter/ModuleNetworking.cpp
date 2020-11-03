@@ -110,6 +110,15 @@ bool ModuleNetworking::preUpdate()
 				if (s1 != SOCKET_ERROR)
 				{
 					onSocketConnected(s1, bindAddr);
+
+					// Send message of connecting
+					OutputMemoryStream message;
+					message << ClientMessage::Welcome;
+					message << "*****************************\n WELCOME TO THE CHAT\n Please type /help to see the aviable commands.\n *****************************";
+					message << MessageType::Info;
+
+					sendPacket(message, s1);
+
 					addSocket(s1);
 				}
 				else
@@ -143,11 +152,12 @@ bool ModuleNetworking::preUpdate()
 		}
 	}
 
-	for (auto it_sock = sockets.begin(); it_sock != sockets.end(); ++it_sock)
+	for (auto it_sock = disconnectedSockets.begin(); it_sock != disconnectedSockets.end(); ++it_sock)
 	{
-		if ((std::find(disconnectedSockets.begin(), disconnectedSockets.end(), (*it_sock))) != disconnectedSockets.end())
+		auto it_erase = std::find(sockets.begin(), sockets.end(), (*it_sock));
+		if (it_erase != sockets.end())
 		{
-			sockets.erase(it_sock);
+			sockets.erase(it_erase);
 			break;
 		}
 	}

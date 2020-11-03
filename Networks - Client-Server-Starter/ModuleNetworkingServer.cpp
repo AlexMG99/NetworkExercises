@@ -109,13 +109,6 @@ void ModuleNetworkingServer::onSocketConnected(SOCKET socket, const sockaddr_in 
 	connectedSocket.socket = socket;
 	connectedSocket.address = socketAddress;
 	connectedSockets.push_back(connectedSocket);
-
-	// Send message of connecting
-	/*OutputMemoryStream message;
-	message << ClientMessage::Welcome;
-	message << "Hola";
-
-	sendPacket(message, socket);*/
 }
 
 void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemoryStream& packet)

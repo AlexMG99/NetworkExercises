@@ -19,3 +19,11 @@ enum class ServerMessage
 	Welcome
 };
 
+enum class MessageType
+{
+	Default,
+	Info,
+	Warning,
+	Error
+};
+

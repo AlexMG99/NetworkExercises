@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModuleNetworking.h"
+#include <map>
 
 class ModuleNetworkingClient : public ModuleNetworking
 {
@@ -56,6 +57,6 @@ private:
 	SOCKET clientSocket = INVALID_SOCKET;
 
 	std::string playerName;
-	std::vector<std::string> fuckingChat;
+	std::map<MessageType, std::string> fuckingChat;
 };
 
