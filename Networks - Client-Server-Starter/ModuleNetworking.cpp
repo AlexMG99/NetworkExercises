@@ -116,18 +116,28 @@ bool ModuleNetworking::preUpdate()
 					reportError("Server Socket not accepted");
 			}
 			else { // Is a client socket
-				// Recv stuff
-
-				// Accept stuff
-				int result = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
-				if (result == SOCKET_ERROR || result == 0)
+				// Recv stuff / Accept stuff
+				InputMemoryStream packet;
+				int bytesRead = recv(s, packet.GetBufferPtr(), packet.GetCapacity(), 0);
+				if (bytesRead > 0)
+				{
+					packet.SetSize((uint32)bytesRead);
+					onSocketReceivedData(s, packet);
+				}
+				else
 				{
 					onSocketDisconnected(s);
 					disconnectedSockets.push_back(s);
 					reportError("Client Socket not accepted");
 				}
+
+				/*int result = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
+				if (result == SOCKET_ERROR || result == 0)
+				{
+					
+				}
 				else
-					onSocketReceivedData(s, incomingDataBuffer);
+					onSocketReceivedData(s, incomingDataBuffer);*/
 				
 			}
 		}
@@ -176,4 +186,15 @@ bool ModuleNetworking::cleanUp()
 void ModuleNetworking::addSocket(SOCKET socket)
 {
 	sockets.push_back(socket);
+}
+
+bool ModuleNetworking::sendPacket(const OutputMemoryStream& packet, SOCKET socket)
+{
+	int result = send(socket, packet.GetBufferPtr(), packet.GetSize(), 0);
+	if (result == SOCKET_ERROR)
+	{
+		reportError("Error sending package");
+		return false;
+	}
+	return true;
 }

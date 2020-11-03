@@ -1,5 +1,8 @@
 #pragma once
 
+// TODO: Remove include
+#include <vector>
+#include <WinSock2.h>
 
 class ModuleNetworking : public Module
 {
@@ -25,7 +28,7 @@ private:
 
 	virtual void onSocketConnected(SOCKET socket, const sockaddr_in &socketAddress) { }
 
-	virtual void onSocketReceivedData(SOCKET s, byte * data) = 0;
+	virtual void onSocketReceivedData(SOCKET s, const InputMemoryStream &packet) = 0;
 
 	virtual void onSocketDisconnected(SOCKET s) = 0;
 
@@ -36,6 +39,8 @@ protected:
 	std::vector<SOCKET> sockets;
 
 	void addSocket(SOCKET socket);
+
+	bool sendPacket(const OutputMemoryStream& packet, SOCKET socket);
 
 	void disconnect();
 
