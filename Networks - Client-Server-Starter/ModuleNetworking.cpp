@@ -101,8 +101,6 @@ bool ModuleNetworking::preUpdate()
 		if (FD_ISSET(s, &readfds)) {
 			if (isListenSocket(s)) { // Is the server socket
 				sockaddr_in bindAddr;
-				//bindAddr.sin_family = AF_INET;
-				//bindAddr.sin_addr.S_un.S_addr = INADDR_ANY;
 				
 				// Accept stuff
 				int len = sizeof(bindAddr);
@@ -110,15 +108,6 @@ bool ModuleNetworking::preUpdate()
 				if (s1 != SOCKET_ERROR)
 				{
 					onSocketConnected(s1, bindAddr);
-
-					// Send message of connecting
-					OutputMemoryStream message;
-					message << ClientMessage::Welcome;
-					message << "*****************************\n WELCOME TO THE CHAT\n Please type /help to see the aviable commands.\n *****************************";
-					message << MessageType::Info;
-
-					sendPacket(message, s1);
-
 					addSocket(s1);
 				}
 				else
@@ -139,15 +128,6 @@ bool ModuleNetworking::preUpdate()
 					disconnectedSockets.push_back(s);
 					reportError("Client Socket not accepted");
 				}
-
-				/*int result = recv(s, (char*)incomingDataBuffer, incomingDataBufferSize, 0);
-				if (result == SOCKET_ERROR || result == 0)
-				{
-					
-				}
-				else
-					onSocketReceivedData(s, incomingDataBuffer);*/
-				
 			}
 		}
 	}

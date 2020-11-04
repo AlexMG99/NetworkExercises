@@ -40,6 +40,9 @@ private:
 
 	void onSocketDisconnected(SOCKET socket) override;
 
+	void HandleWelcomeMessage(SOCKET socket, const InputMemoryStream& packet);
+	void HandleNotWelcomeMessage(SOCKET socket, const InputMemoryStream& packet);
+
 
 
 	//////////////////////////////////////////////////////////////////////
@@ -51,6 +54,7 @@ private:
 		Stopped,
 		Start,
 		Logging,
+		Disconnected,
 		Logged
 	};
 

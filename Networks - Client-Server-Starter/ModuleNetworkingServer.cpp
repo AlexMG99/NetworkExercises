@@ -115,18 +115,15 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 	packet >> clientMessage;
 
 	// Set the player name of the corresponding connected socket proxy
-	if (clientMessage == ClientMessage::Hello)
+	switch (clientMessage)
 	{
-		std::string playerName;
-		packet >> playerName;
-
-		for (auto& connectedSocket : connectedSockets)
-		{
-			if (connectedSocket.socket == socket)
-			{
-				connectedSocket.playerName = playerName;
-			}
-		}
+	case ClientMessage::Hello:
+		HandleHelloMessage(socket, packet);
+		break;
+	case ClientMessage::ChatMessage:
+		break;
+	default:
+		break;
 	}
 }
 
@@ -144,3 +141,49 @@ void ModuleNetworkingServer::onSocketDisconnected(SOCKET socket)
 	}
 }
 
+bool ModuleNetworkingServer::IsNameAvailable(const char* name)
+{
+	for (auto it = connectedSockets.begin(); it != connectedSockets.end(); ++it)
+	{
+		if (strcmp((*it).playerName.c_str(), name) == 0)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void ModuleNetworkingServer::HandleHelloMessage(SOCKET s, const InputMemoryStream& packet)
+{
+	std::string playerName;
+	packet >> playerName;
+
+	for (auto& connectedSocket : connectedSockets)
+	{
+		if (connectedSocket.socket == s)
+		{
+			if (IsNameAvailable(playerName.c_str()))
+			{
+				connectedSocket.playerName = playerName;
+
+				// Send message of connecting
+				OutputMemoryStream message;
+				message << ServerMessage::Welcome;
+				message << "*****************************\n WELCOME TO THE CHAT\n Please type /help to see the aviable commands.\n *****************************";
+				message << MessageType::Info;
+
+				sendPacket(message, s);
+			}
+			else
+			{
+				// Send message of connecting
+				OutputMemoryStream message;
+				message << ServerMessage::NotWelcome;
+
+				sendPacket(message, s);
+			}
+
+		}
+	}
+}

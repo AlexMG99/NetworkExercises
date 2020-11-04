@@ -40,6 +40,10 @@ private:
 
 	void onSocketDisconnected(SOCKET socket) override;
 
+	bool IsNameAvailable(const char* name);
+
+	void HandleHelloMessage(SOCKET s, const InputMemoryStream& packet);
+
 
 
 	//////////////////////////////////////////////////////////////////////

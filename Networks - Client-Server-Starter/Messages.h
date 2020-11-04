@@ -6,17 +6,13 @@
 enum class ClientMessage
 {
 	Hello,
-	Welcome,
-	Help,
-	Ban,
-	Kick,
-	Whisper,
-	Goodbye
+	ChatMessage
 };
 
 enum class ServerMessage
 {
-	Welcome
+	Welcome,
+	NotWelcome
 };
 
 enum class MessageType
