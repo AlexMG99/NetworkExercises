@@ -65,6 +65,14 @@ private:
 
 	std::string playerName;
 	ImVec4 colorName = ImVec4(255, 255, 255, 255);
-	std::vector<std::string> fuckingChat;
+
+	struct ChatText {
+		ChatText(std::string tM, MessageType mT) { textMessage = tM; mType = mT; };
+		std::string textMessage;
+		MessageType mType;
+	};
+
+	std::vector<ChatText> fuckingChat;
+
 };
 

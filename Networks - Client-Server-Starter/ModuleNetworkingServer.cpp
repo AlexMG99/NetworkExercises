@@ -193,12 +193,14 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET s, const InputMemoryStrea
 
 void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream& packet)
 {
+	std::string playerName;
+	packet >> playerName;
 	std::string message;
 	packet >> message;
 
 	OutputMemoryStream chatMessage;
 	chatMessage << ServerMessage::UserMessage;
-	chatMessage << message;
+	chatMessage << playerName + ": " + message;
 	chatMessage << MessageType::Message;
 
 	for (auto& connectedSocket : connectedSockets)

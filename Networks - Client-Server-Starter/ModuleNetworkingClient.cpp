@@ -7,7 +7,6 @@
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
 {
 	playerName = pplayerName;
-	playerName += '\0';
 
 	//TODO: Check colors
 	//colorName = colors[(rand() % (MAX_COLORS - 1))];
@@ -108,32 +107,30 @@ bool ModuleNetworkingClient::gui()
 		ImGui::BeginChild("##ChatBox", ImVec2(ImGui::GetWindowContentRegionWidth(), ImGui::GetContentRegionAvail().y), true);
 		for (auto line = fuckingChat.begin(); line != fuckingChat.end(); ++line)
 		{
-			ImGui::Text("%s", (*line).c_str());
-			/*switch ((*line).first)
+			switch ((*line).mType)
 			{
 			case MessageType::Default:
-				ImGui::Text("%s", (*line).second.c_str());
+				ImGui::Text("%s", (*line).textMessage.c_str());
 				break;
 			case MessageType::Info:
-				ImGui::TextColored(Yellow, "%s", (*line).second.c_str());
+				ImGui::TextColored(Yellow, "%s", (*line).textMessage.c_str());
 				break;
 			case MessageType::Message:
-				ImGui::TextColored(colorName, "%s: ", playerName.c_str()); ImGui::SameLine();
-				ImGui::TextColored(White, "%s", (*line).second.c_str());
+				ImGui::TextColored(White, "%s", (*line).textMessage.c_str());
 				break;
 			case MessageType::Connection:
 			{
-				ImGui::TextColored(LimeGreen, "         ****** %s joined ******", (*line).second.c_str());
+				ImGui::TextColored(LimeGreen, "         ****** %s joined ******", (*line).textMessage.c_str());
 			}
 				break;
 			case MessageType::Disconnection:
 			{
-				ImGui::TextColored(FirebrickRed, "         ****** %s left ******", (*line).second.c_str());
+				ImGui::TextColored(FirebrickRed, "         ****** %s left ******", (*line).textMessage.c_str());
 			}
 			break;
 			default:
 				break;
-			}*/
+			}
 			
 		}
 
@@ -144,7 +141,9 @@ bool ModuleNetworkingClient::gui()
 		{
 			OutputMemoryStream message;
 			message << ClientMessage::ChatMessage;
+			message << playerName;
 			message << chatText;
+			
 
 			sendPacket(message, clientSocket);
 
@@ -196,8 +195,10 @@ void ModuleNetworkingClient::HandleServerMessage(SOCKET socket, const InputMemor
 	packet >> message;
 	MessageType type;
 	packet >> type;
-	//fuckingChat.insert(std::pair<MessageType, std::string>(type, message));
-	fuckingChat.push_back(message);
+
+	ChatText chatText = ChatText(message, type);
+	fuckingChat.push_back(chatText);
+	
 }
 
 void ModuleNetworkingClient::HandleNotWelcomeMessage(SOCKET socket, const InputMemoryStream& packet)
