@@ -43,8 +43,9 @@ private:
 	bool IsNameAvailable(const char* name);
 
 	void HandleHelloMessage(SOCKET s, const InputMemoryStream& packet);
-
-
+	void HandleChatMessage(SOCKET s, const InputMemoryStream& packet);
+	void HandleUserConnectionMessage(SOCKET s, const char* pName);
+	void HandleUserDisconnectionMessage(SOCKET s, const InputMemoryStream& packet);
 
 	//////////////////////////////////////////////////////////////////////
 	// State

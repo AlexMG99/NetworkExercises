@@ -6,18 +6,25 @@
 enum class ClientMessage
 {
 	Hello,
-	ChatMessage
+	ChatMessage,
+	Connection,
+	Disconnection
 };
 
 enum class ServerMessage
 {
 	Welcome,
-	NotWelcome
+	NotWelcome,
+	UserConnection,
+	UserMessage,
+	UserDisconnection
 };
 
 enum class MessageType
 {
 	Default,
+	Connection,
+	Disconnection,
 	Info,
 	Message,
 	Warning,

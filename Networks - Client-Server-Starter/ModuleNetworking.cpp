@@ -124,9 +124,11 @@ bool ModuleNetworking::preUpdate()
 				}
 				else
 				{
+					if (bytesRead == SOCKET_ERROR)
+						reportError("Client Socket not accepted");
+
 					onSocketDisconnected(s);
 					disconnectedSockets.push_back(s);
-					reportError("Client Socket not accepted");
 				}
 			}
 		}

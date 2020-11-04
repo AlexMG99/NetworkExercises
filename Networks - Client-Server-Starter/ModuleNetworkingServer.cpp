@@ -121,6 +121,10 @@ void ModuleNetworkingServer::onSocketReceivedData(SOCKET socket, const InputMemo
 		HandleHelloMessage(socket, packet);
 		break;
 	case ClientMessage::ChatMessage:
+		HandleChatMessage(socket, packet);
+		break;
+	case ClientMessage::Disconnection:
+		HandleUserDisconnectionMessage(socket, packet);
 		break;
 	default:
 		break;
@@ -163,27 +167,82 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET s, const InputMemoryStrea
 	{
 		if (connectedSocket.socket == s)
 		{
+			OutputMemoryStream message;
 			if (IsNameAvailable(playerName.c_str()))
 			{
 				connectedSocket.playerName = playerName;
 
 				// Send message of connecting
-				OutputMemoryStream message;
 				message << ServerMessage::Welcome;
-				message << "*****************************\n WELCOME TO THE CHAT\n Please type /help to see the aviable commands.\n *****************************";
+				message << "**********************************************************\n              WELCOME TO THE CHAT\n Please type /help to see the aviable commands.\n**********************************************************";
 				message << MessageType::Info;
-
 				sendPacket(message, s);
+
+				HandleUserConnectionMessage(s, connectedSocket.playerName.c_str());
 			}
 			else
 			{
 				// Send message of connecting
-				OutputMemoryStream message;
 				message << ServerMessage::NotWelcome;
-
 				sendPacket(message, s);
 			}
-
+			
 		}
 	}
+}
+
+void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream& packet)
+{
+	std::string message;
+	packet >> message;
+
+	OutputMemoryStream chatMessage;
+	chatMessage << ServerMessage::UserMessage;
+	chatMessage << message;
+	chatMessage << MessageType::Message;
+
+	for (auto& connectedSocket : connectedSockets)
+	{
+		sendPacket(chatMessage, connectedSocket.socket);
+	}
+}
+
+void ModuleNetworkingServer::HandleUserConnectionMessage(SOCKET s, const char* pName)
+{
+	// Server debug information
+	LOG("User %s connected to the server", pName);
+
+	// Notice other users that one user has been disconnected
+	OutputMemoryStream conMessage;
+	conMessage << ServerMessage::UserConnection;
+	conMessage << pName;
+	conMessage << MessageType::Connection;
+
+	for (auto& connectedSocket : connectedSockets)
+	{
+		if(connectedSocket.socket != s)
+			sendPacket(conMessage, connectedSocket.socket);
+	}
+}
+
+void ModuleNetworkingServer::HandleUserDisconnectionMessage(SOCKET s, const InputMemoryStream& packet)
+{
+	// Server debug information
+	std::string playerName;
+	packet >> playerName;
+
+	LOG("User %s disconnected from the server", playerName.c_str());
+
+	// Notice other users that one user has been disconnected
+	OutputMemoryStream message;
+	message << ServerMessage::UserDisconnection;
+	message << playerName;
+	message << MessageType::Disconnection;
+
+	for (auto& connectedSocket : connectedSockets)
+	{
+		if (connectedSocket.socket != s)
+			sendPacket(message, connectedSocket.socket);
+	}
+
 }

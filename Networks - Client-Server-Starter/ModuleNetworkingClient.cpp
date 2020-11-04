@@ -2,6 +2,8 @@
 #include "ModuleNetworkingClient.h"
 #include <random>
 
+#define MAX_CHAR 256
+
 bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPort, const char *pplayerName)
 {
 	playerName = pplayerName;
@@ -68,10 +70,15 @@ bool ModuleNetworkingClient::update()
 		break;
 	case ClientState::Disconnected:
 	{
+		OutputMemoryStream message;
+		message << ClientMessage::Disconnection;
+		message << playerName;
+
+		sendPacket(message, clientSocket);
+
 		LOG("Disconnected to the server succesfully");
 		disconnect();
 		state = ClientState::Stopped;
-		//TODO: send message to server
 	}
 		break;
 	default:
@@ -99,27 +106,50 @@ bool ModuleNetworkingClient::gui()
 		}
 
 		ImGui::BeginChild("##ChatBox", ImVec2(ImGui::GetWindowContentRegionWidth(), ImGui::GetContentRegionAvail().y), true);
-		for (auto line : fuckingChat)
+		for (auto line = fuckingChat.begin(); line != fuckingChat.end(); ++line)
 		{
-			switch (line.first)
+			ImGui::Text("%s", (*line).c_str());
+			/*switch ((*line).first)
 			{
 			case MessageType::Default:
-				ImGui::Text("%s", line.second.c_str());
+				ImGui::Text("%s", (*line).second.c_str());
 				break;
 			case MessageType::Info:
-				ImGui::TextColored(Yellow, "%s", line.second.c_str());
+				ImGui::TextColored(Yellow, "%s", (*line).second.c_str());
 				break;
 			case MessageType::Message:
 				ImGui::TextColored(colorName, "%s: ", playerName.c_str()); ImGui::SameLine();
-				ImGui::TextColored(White, "%s", line.second.c_str());
+				ImGui::TextColored(White, "%s", (*line).second.c_str());
 				break;
+			case MessageType::Connection:
+			{
+				ImGui::TextColored(LimeGreen, "         ****** %s joined ******", (*line).second.c_str());
+			}
+				break;
+			case MessageType::Disconnection:
+			{
+				ImGui::TextColored(FirebrickRed, "         ****** %s left ******", (*line).second.c_str());
+			}
+			break;
 			default:
 				break;
-			}
+			}*/
 			
 		}
 
 		ImGui::EndChild();
+
+		static char chatText[MAX_CHAR];
+		if (ImGui::InputText("Chat", chatText, IM_ARRAYSIZE(chatText), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			OutputMemoryStream message;
+			message << ClientMessage::ChatMessage;
+			message << chatText;
+
+			sendPacket(message, clientSocket);
+
+			memset(chatText, 0, MAX_CHAR);
+		}
 
 		ImGui::End();
 	}
@@ -136,10 +166,19 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	switch (serverMessage)
 	{
 	case ServerMessage::Welcome:
-		HandleWelcomeMessage(socket, packet);
+		HandleServerMessage(socket, packet);
 		break;
 	case ServerMessage::NotWelcome:
 		HandleNotWelcomeMessage(socket, packet);
+		break;
+	case ServerMessage::UserConnection:
+		HandleServerMessage(socket, packet);
+		break;
+	case ServerMessage::UserMessage:
+		HandleServerMessage(socket, packet);
+		break;
+	case ServerMessage::UserDisconnection:
+		HandleServerMessage(socket, packet);
 		break;
 	default:
 		break;
@@ -151,13 +190,14 @@ void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
 	state = ClientState::Stopped;
 }
 
-void ModuleNetworkingClient::HandleWelcomeMessage(SOCKET socket, const InputMemoryStream& packet)
+void ModuleNetworkingClient::HandleServerMessage(SOCKET socket, const InputMemoryStream& packet)
 {
-	std::string welcomeMessage;
-	packet >> welcomeMessage;
+	std::string message;
+	packet >> message;
 	MessageType type;
 	packet >> type;
-	fuckingChat.insert(std::pair<MessageType, std::string>(type, welcomeMessage));
+	//fuckingChat.insert(std::pair<MessageType, std::string>(type, message));
+	fuckingChat.push_back(message);
 }
 
 void ModuleNetworkingClient::HandleNotWelcomeMessage(SOCKET socket, const InputMemoryStream& packet)
@@ -165,4 +205,5 @@ void ModuleNetworkingClient::HandleNotWelcomeMessage(SOCKET socket, const InputM
 	ELOG("Sorry, username %s already taken. Please try a new one :3", playerName.c_str());
 	state = ClientState::Disconnected;
 }
+
 

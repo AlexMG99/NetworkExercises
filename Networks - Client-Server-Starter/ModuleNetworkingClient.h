@@ -40,7 +40,7 @@ private:
 
 	void onSocketDisconnected(SOCKET socket) override;
 
-	void HandleWelcomeMessage(SOCKET socket, const InputMemoryStream& packet);
+	void HandleServerMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandleNotWelcomeMessage(SOCKET socket, const InputMemoryStream& packet);
 
 
@@ -65,6 +65,6 @@ private:
 
 	std::string playerName;
 	ImVec4 colorName = ImVec4(255, 255, 255, 255);
-	std::map<MessageType, std::string> fuckingChat;
+	std::vector<std::string> fuckingChat;
 };
 
