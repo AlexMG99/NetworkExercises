@@ -8,8 +8,9 @@ bool  ModuleNetworkingClient::start(const char * serverAddressStr, int serverPor
 {
 	playerName = pplayerName;
 
-	//TODO: Check colors
-	//colorName = colors[(rand() % (MAX_COLORS - 1))];
+	// User color
+	srand(time(NULL));
+	colorPos = rand() % (MAX_COLORS - 1);
 
 	// TODO(jesus): TCP connection stuff
 	// - Create the socket
@@ -92,7 +93,6 @@ bool ModuleNetworkingClient::gui()
 	if (state != ClientState::Stopped)
 	{
 		// NOTE(jesus): You can put ImGui code here for debugging purposes
-		ImGui::ShowDemoWindow();
 		ImGui::Begin("Client Window");
 
 		Texture *tex = App->modResources->client;
@@ -116,6 +116,7 @@ bool ModuleNetworkingClient::gui()
 				ImGui::TextColored(Yellow, "%s", (*line).textMessage.c_str());
 				break;
 			case MessageType::Message:
+				ImGui::TextColored(colors[(*line).colorPos], "%s: ", (*line).pName.c_str()); ImGui::SameLine();
 				ImGui::TextColored(White, "%s", (*line).textMessage.c_str());
 				break;
 			case MessageType::Connection:
@@ -143,8 +144,8 @@ bool ModuleNetworkingClient::gui()
 			message << ClientMessage::ChatMessage;
 			message << playerName;
 			message << chatText;
+			message << colorPos;
 			
-
 			sendPacket(message, clientSocket);
 
 			memset(chatText, 0, MAX_CHAR);
@@ -174,7 +175,7 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		HandleServerMessage(socket, packet);
 		break;
 	case ServerMessage::UserMessage:
-		HandleServerMessage(socket, packet);
+		HandleChatMessage(socket, packet);
 		break;
 	case ServerMessage::UserDisconnection:
 		HandleServerMessage(socket, packet);
@@ -199,6 +200,21 @@ void ModuleNetworkingClient::HandleServerMessage(SOCKET socket, const InputMemor
 	ChatText chatText = ChatText(message, type);
 	fuckingChat.push_back(chatText);
 	
+}
+
+void ModuleNetworkingClient::HandleChatMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string pName;
+	packet >> pName;
+	std::string message;
+	packet >> message;
+	MessageType type;
+	packet >> type;
+	int cPos;
+	packet >> cPos;
+
+	ChatText chatText = ChatText(message, type, pName, cPos);
+	fuckingChat.push_back(chatText);
 }
 
 void ModuleNetworkingClient::HandleNotWelcomeMessage(SOCKET socket, const InputMemoryStream& packet)

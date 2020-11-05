@@ -41,6 +41,7 @@ private:
 	void onSocketDisconnected(SOCKET socket) override;
 
 	void HandleServerMessage(SOCKET socket, const InputMemoryStream& packet);
+	void HandleChatMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandleNotWelcomeMessage(SOCKET socket, const InputMemoryStream& packet);
 
 
@@ -64,12 +65,14 @@ private:
 	SOCKET clientSocket = INVALID_SOCKET;
 
 	std::string playerName;
-	ImVec4 colorName = ImVec4(255, 255, 255, 255);
+	int colorPos = 0;
 
 	struct ChatText {
-		ChatText(std::string tM, MessageType mT) { textMessage = tM; mType = mT; };
-		std::string textMessage;
+		ChatText(std::string tM, MessageType mT, std::string pN = "", int cP = 0) { textMessage = tM; mType = mT; pName = pN; colorPos = cP; };
+		std::string textMessage = "";
 		MessageType mType;
+		std::string pName = "";
+		int colorPos = 0;
 	};
 
 	std::vector<ChatText> fuckingChat;

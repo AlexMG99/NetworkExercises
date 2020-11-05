@@ -197,11 +197,15 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 	packet >> playerName;
 	std::string message;
 	packet >> message;
+	int cPos;
+	packet >> cPos;
 
 	OutputMemoryStream chatMessage;
 	chatMessage << ServerMessage::UserMessage;
-	chatMessage << playerName + ": " + message;
+	chatMessage << playerName;
+	chatMessage << message;
 	chatMessage << MessageType::Message;
+	chatMessage << cPos;
 
 	for (auto& connectedSocket : connectedSockets)
 	{
