@@ -4,6 +4,7 @@
 
 //TODO: Remove includes
 #include "imgui/imgui.h"
+#include "Pokebot.h"
 #include <map>
 
 class ModuleNetworkingClient : public ModuleNetworking
@@ -41,6 +42,7 @@ private:
 	void onSocketDisconnected(SOCKET socket) override;
 
 	void HandleServerMessage(SOCKET socket, const InputMemoryStream& packet);
+	void HandlePokemonCatchMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandleChangeNameMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandleKickMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandleChatMessage(SOCKET socket, const InputMemoryStream& packet);
@@ -78,6 +80,7 @@ private:
 		int colorPos = 0;
 	};
 
+	std::vector<Pokemon> pokeTeam;
 	std::vector<ChatText> fuckingChat;
 
 };

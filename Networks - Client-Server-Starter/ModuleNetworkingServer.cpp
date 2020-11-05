@@ -1,4 +1,5 @@
 #include "ModuleNetworkingServer.h"
+#include <random>
 
 
 //////////////////////////////////////////////////////////////////////
@@ -224,12 +225,12 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 		if (strcmp(firstCommand.c_str(), "help") == 0)
 		{
 			chatMessage << ServerMessage::Command;
-			chatMessage << "******************************************************\nThe commands you can use are:\n-/list: show list of all users.\n-/kick: to disconnect some other user from the chat.\n-/whisper: to send a message only to one user.\n-/change_name: to change your username.\n******************************************************";
+			chatMessage << "******************************************************\nThe commands you can use are:\n-/list: show list of all users.\n-/kick: to disconnect some other user from the chat.\n-/whisper: to send a message only to one user.\n-/change_name: to change your username.\n-/p help: shows pokebot commands\n******************************************************";
 			chatMessage << MessageType::Help;
 		}
 		else if (strcmp(firstCommand.c_str(), "list") == 0)
 		{
-			std::string userNames = "List of users:\n******************************************************\n";
+			std::string userNames = "******************************************************\nList of users:\n";
 			for (auto& connectedSocket : connectedSockets)
 			{
 				userNames += connectedSocket.playerName + "\n";
@@ -239,6 +240,131 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 			chatMessage << ServerMessage::Command;
 			chatMessage << userNames;
 			chatMessage << MessageType::List;
+		}
+		else if (strcmp(firstCommand.c_str(), "p") == 0)
+		{
+#pragma region Pokebot
+			std::string pokeCommand;
+			std::string afterPokeCommand;
+			int pokePos = afterCommand.find(' ');
+			pokeCommand = afterCommand.substr(0, pokePos);
+
+			if (strcmp(pokeCommand.c_str(), "help") == 0)
+			{
+				chatMessage << ServerMessage::Command;
+				chatMessage << "******************************************************\nThe pokemon commands you can use are:\n-/p on: turns on the bot.\n-/p off: turns off the bot.\n-/p catch name: catch the last pokemon if named is guessed and you are the first one.\n-/p team: show your pokemon list.\n******************************************************";
+				chatMessage << MessageType::Help;
+			}
+			else if (strcmp(pokeCommand.c_str(), "on") == 0)
+			{
+				pokebot.turnedOn = true;
+				chatMessage << ServerMessage::Command;
+				chatMessage << "Pokebot turned on. Go catch'em all!";
+				chatMessage << MessageType::Pokemon;
+				srand(time(NULL));
+
+				for (auto& connectedSocket : connectedSockets)
+				{
+					if(connectedSocket.socket != s)
+						sendPacket(chatMessage, connectedSocket.socket);
+				}
+			}
+			else if (strcmp(pokeCommand.c_str(), "off") == 0)
+			{
+				pokebot.turnedOn = false;
+				chatMessage << ServerMessage::Command;
+				chatMessage << "Pokebot turned off. Goodbye little Pichu owo!";
+				chatMessage << MessageType::Pokemon;
+
+				for (auto& connectedSocket : connectedSockets)
+				{
+					if (connectedSocket.socket != s)
+						sendPacket(chatMessage, connectedSocket.socket);
+				}
+			}
+			else if (strcmp(pokeCommand.c_str(), "catch") == 0)
+			{
+				int pokePos2 = afterCommand.find(' ');
+				std::string pokeName;
+				if (pokePos != -1)
+				{
+					if (pokebot.lastPokemon.pokedexNum == -1)
+					{
+						chatMessage << ServerMessage::Command;
+						chatMessage << "There's no Pokemon in the tall grass...";
+						chatMessage << MessageType::Pokemon;
+					}
+					else
+					{
+						pokeName = afterCommand.substr(pokePos2 + 1, afterCommand.length());
+
+						if (strcmp(pokebot.lastPokemon.name.c_str(), pokeName.c_str()) == 0)
+						{
+							chatMessage << ServerMessage::PokeCatch;
+							chatMessage << "Congratulations! " + pokeName + " has been added to your poke team!";
+							chatMessage << MessageType::Pokemon;
+							chatMessage << (pokebot.lastPokemon.pokedexNum - 1);
+							chatMessage << (pokebot.lastPokemon.name);
+
+							OutputMemoryStream pityMessage;
+							pityMessage << ServerMessage::Command;
+							pityMessage << playerName + " has catched " + pokeName + ". Better luck next time ;)";
+							pityMessage << MessageType::Pokemon;
+
+							for (auto& connectedSocket : connectedSockets)
+							{
+								if(connectedSocket.socket != s)
+									sendPacket(pityMessage, connectedSocket.socket);
+								else
+									connectedSocket.pokemons.push_back(Pokemon(pokebot.lastPokemon.pokedexNum, pokebot.lastPokemon.name.c_str()));
+							}
+
+							pokebot.lastPokemon = Pokemon();
+						}
+						else
+						{
+							chatMessage << ServerMessage::Command;
+							chatMessage << "You really wrote " + pokeName + " ? Are you pikablind or just dislexic?";
+							chatMessage << MessageType::Pokemon;
+						}
+					}
+				}
+				else
+				{
+					chatMessage << ServerMessage::Command;
+					chatMessage << "You have to write a pokemon name, Ditto head!";
+					chatMessage << MessageType::Pokemon;
+				}
+
+				
+			}
+			else if (strcmp(pokeCommand.c_str(), "team") == 0)
+			{
+				std::string pokeTeam = "******************************************************\nList of pokemons:\n";
+				for (auto& connectedSocket : connectedSockets)
+				{
+					if (connectedSocket.socket == s)
+					{
+						for (auto pokemon : connectedSocket.pokemons)
+						{
+							pokeTeam += pokemon.name + "\n";
+						}
+					}
+				}
+				pokeTeam += "******************************************************";
+
+				chatMessage << ServerMessage::Command;
+				chatMessage << pokeTeam;
+				chatMessage << MessageType::Pokemon;
+			}
+			else
+			{
+				chatMessage << ServerMessage::Command;
+				chatMessage << "Wrong pokecommand! If you need help write /p help";
+				chatMessage << MessageType::Error;
+			}
+
+#pragma endregion
 		}
 		else // Two or more words commands
 		{
@@ -339,6 +465,18 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 	}
 	else
 	{
+		bool pokemonSpawned = false;
+		OutputMemoryStream pokeMessage;
+#pragma region pokeSpawn
+	if (pokebot.turnedOn && (rand() % 100) < 50)
+	{
+		pokebot.lastPokemon = pokebot.pokemons[rand() % 150];
+		pokeMessage << ServerMessage::PokeSpawn;
+		pokeMessage << pokebot.lastPokemon.name + " has spawned! Type /p catch <pokemon_name> to catch it!";
+		pokeMessage << MessageType::Pokemon;
+		pokemonSpawned = true;
+	}
+#pragma endregion
 		chatMessage << ServerMessage::UserMessage;
 		chatMessage << playerName;
 		chatMessage << message;
@@ -348,6 +486,8 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 		for (auto& connectedSocket : connectedSockets)
 		{
 			sendPacket(chatMessage, connectedSocket.socket);
+			if(pokemonSpawned)
+				sendPacket(pokeMessage, connectedSocket.socket);
 		}
 	}
 }

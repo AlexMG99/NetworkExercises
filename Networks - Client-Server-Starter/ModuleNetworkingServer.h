@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ModuleNetworking.h"
+#include "Pokebot.h"
 
 class ModuleNetworkingServer : public ModuleNetworking
 {
@@ -61,12 +62,15 @@ private:
 
 	SOCKET listenSocket;
 
+	PokeBot pokebot;
+
 	struct ConnectedSocket
 	{
 		sockaddr_in address;
 		SOCKET socket;
 		std::string playerName;
 		int colorPosition = 0;
+		std::vector<Pokemon> pokemons;
 	};
 
 	std::vector<ConnectedSocket> connectedSockets;

@@ -138,6 +138,9 @@ bool ModuleNetworkingClient::gui()
 			case MessageType::Whisper:
 				ImGui::TextColored(Purple, "%s", (*line).textMessage.c_str());
 				break;
+			case MessageType::Pokemon:
+				ImGui::TextColored(PokeColor, "%s", (*line).textMessage.c_str());
+				break;
 			default:
 				break;
 			}
@@ -204,6 +207,12 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	case ServerMessage::UserDisconnection:
 		HandleServerMessage(socket, packet);
 		break;
+	case ServerMessage::PokeSpawn:
+		HandleServerMessage(socket, packet);
+		break;
+	case ServerMessage::PokeCatch:
+		HandlePokemonCatchMessage(socket, packet);
+		break;
 	default:
 		break;
 	}
@@ -224,6 +233,19 @@ void ModuleNetworkingClient::HandleServerMessage(SOCKET socket, const InputMemor
 	ChatText chatText = ChatText(message, type);
 	fuckingChat.push_back(chatText);
 	
+}
+
+void ModuleNetworkingClient::HandlePokemonCatchMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	HandleServerMessage(socket, packet);
+
+	int lisPos;
+	packet >> lisPos;
+	std::string pokeName;
+	packet >> pokeName;
+
+	pokeTeam.push_back(Pokemon(lisPos, pokeName.c_str()));
+
 }
 
 void ModuleNetworkingClient::HandleChangeNameMessage(SOCKET socket, const InputMemoryStream& packet)

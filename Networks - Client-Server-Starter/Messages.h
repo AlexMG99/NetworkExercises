@@ -21,7 +21,9 @@ enum class ServerMessage
 	UserConnection,
 	UserMessage,
 	WhisperMessage,
-	UserDisconnection
+	UserDisconnection,
+	PokeSpawn,
+	PokeCatch
 };
 
 enum class MessageType
@@ -32,6 +34,7 @@ enum class MessageType
 	Help,
 	List,
 	Info,
+	Pokemon,
 	Whisper,
 	Message,
 	Warning,
