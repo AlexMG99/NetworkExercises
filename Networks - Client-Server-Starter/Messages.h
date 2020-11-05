@@ -20,6 +20,7 @@ enum class ServerMessage
 	Kick,
 	UserConnection,
 	UserMessage,
+	WhisperMessage,
 	UserDisconnection
 };
 
@@ -31,6 +32,7 @@ enum class MessageType
 	Help,
 	List,
 	Info,
+	Whisper,
 	Message,
 	Warning,
 	Error

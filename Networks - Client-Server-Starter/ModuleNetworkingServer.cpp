@@ -209,21 +209,25 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 
 	if (message[0] == '/')
 	{
-		std::string command;
+		std::string firstCommand;
+		std::string afterCommand;
 		int pos = message.find(' ');
 		if(pos == -1)
-			command = message.substr(1, pos);
+			firstCommand = message.substr(1, pos);
 		else
-			command = message.substr(1, pos - 1);
+		{
+			firstCommand = message.substr(1, pos - 1);
+			afterCommand = message.substr(pos + 1, message.length());
+		}
 
 		// Commands
-		if (strcmp(command.c_str(), "help") == 0)
+		if (strcmp(firstCommand.c_str(), "help") == 0)
 		{
 			chatMessage << ServerMessage::Command;
 			chatMessage << "******************************************************\nThe commands you can use are:\n-/list: show list of all users.\n-/kick: to disconnect some other user from the chat.\n-/whisper: to send a message only to one user.\n-/change_name: to change your username.\n******************************************************";
 			chatMessage << MessageType::Help;
 		}
-		else if (strcmp(command.c_str(), "list") == 0)
+		else if (strcmp(firstCommand.c_str(), "list") == 0)
 		{
 			std::string userNames = "List of users:\n******************************************************\n";
 			for (auto& connectedSocket : connectedSockets)
@@ -238,14 +242,14 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 		}
 		else // Two or more words commands
 		{
-			int pos2 = message.find_last_of(" ") + 1;
+			int pos2 = afterCommand.find_first_of(" ");
 
-			if (pos2 != -1)
+			if (!afterCommand.empty())
 			{
-				std::string name = message.substr(pos2, message.length());
+				std::string name = afterCommand.substr(0, pos2);
 
 				// Change Name
-				if (strcmp(command.c_str(), "change_name") == 0)
+				if (strcmp(firstCommand.c_str(), "change_name") == 0)
 				{
 					if (IsNameAvailable(name.c_str()))
 					{
@@ -267,7 +271,7 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 					}
 					
 				}
-				else if (strcmp(command.c_str(), "kick") == 0)
+				else if (strcmp(firstCommand.c_str(), "kick") == 0)
 				{
 					OutputMemoryStream kickMessage;
 					bool userExist = false;
@@ -287,6 +291,35 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 					{
 						chatMessage << ServerMessage::Command;
 						chatMessage << "User not founded. Unable to kick";
+						chatMessage << MessageType::Error;
+					}
+					else
+						return;
+				}
+				else if (strcmp(firstCommand.c_str(), "whisper") == 0)
+				{
+					OutputMemoryStream whisper;
+					bool userExist = false;
+					std::string whisperMessage = afterCommand.substr(pos2 + 1, afterCommand.length());
+
+					whisper << ServerMessage::WhisperMessage;
+					whisper << playerName;
+					whisper << whisperMessage;
+					whisper << MessageType::Whisper;
+
+					for (auto& connectedSocket : connectedSockets)
+					{
+						if (strcmp(connectedSocket.playerName.c_str(), name.c_str()) == 0)
+						{
+							sendPacket(whisper, connectedSocket.socket);
+							userExist = true;
+						}
+					}
+
+					if (!userExist)
+					{
+						chatMessage << ServerMessage::Command;
+						chatMessage << "User not founded. Unable to whisper";
 						chatMessage << MessageType::Error;
 					}
 					else

@@ -135,6 +135,9 @@ bool ModuleNetworkingClient::gui()
 			case MessageType::Error:
 				ImGui::TextColored(Red, "%s", (*line).textMessage.c_str());
 				break;
+			case MessageType::Whisper:
+				ImGui::TextColored(Purple, "%s", (*line).textMessage.c_str());
+				break;
 			default:
 				break;
 			}
@@ -194,6 +197,9 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		break;
 	case ServerMessage::UserMessage:
 		HandleChatMessage(socket, packet);
+		break;
+	case ServerMessage::WhisperMessage:
+		HandleWhisperMessage(socket, packet);
 		break;
 	case ServerMessage::UserDisconnection:
 		HandleServerMessage(socket, packet);
@@ -256,6 +262,21 @@ void ModuleNetworkingClient::HandleChatMessage(SOCKET socket, const InputMemoryS
 	packet >> cPos;
 
 	ChatText chatText = ChatText(message, type, pName, cPos);
+	fuckingChat.push_back(chatText);
+}
+
+void ModuleNetworkingClient::HandleWhisperMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string pName;
+	packet >> pName;
+	std::string message;
+	packet >> message;
+	MessageType type;
+	packet >> type;
+
+	std::string finalMessage = pName + " whispers you: " + message;
+
+	ChatText chatText = ChatText(finalMessage, type, pName);
 	fuckingChat.push_back(chatText);
 }
 
