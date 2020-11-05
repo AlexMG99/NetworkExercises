@@ -162,6 +162,8 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET s, const InputMemoryStrea
 {
 	std::string playerName;
 	packet >> playerName;
+	int colPos;
+	packet >> colPos;
 
 	for (auto& connectedSocket : connectedSockets)
 	{
@@ -171,10 +173,11 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET s, const InputMemoryStrea
 			if (IsNameAvailable(playerName.c_str()))
 			{
 				connectedSocket.playerName = playerName;
+				connectedSocket.colorPosition = colPos;
 
 				// Send message of connecting
 				message << ServerMessage::Welcome;
-				message << "**********************************************************\n              WELCOME TO THE CHAT\n Please type /help to see the aviable commands.\n**********************************************************";
+				message << "******************************************************\n              WELCOME TO THE CHAT\n Please type /help to see the aviable commands.\n******************************************************";
 				message << MessageType::Info;
 				sendPacket(message, s);
 
@@ -193,6 +196,7 @@ void ModuleNetworkingServer::HandleHelloMessage(SOCKET s, const InputMemoryStrea
 
 void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream& packet)
 {
+	// Recieve message information
 	std::string playerName;
 	packet >> playerName;
 	std::string message;
@@ -200,16 +204,118 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 	int cPos;
 	packet >> cPos;
 
+	//Check if its a command or a message
 	OutputMemoryStream chatMessage;
-	chatMessage << ServerMessage::UserMessage;
-	chatMessage << playerName;
-	chatMessage << message;
-	chatMessage << MessageType::Message;
-	chatMessage << cPos;
 
-	for (auto& connectedSocket : connectedSockets)
+	if (message[0] == '/')
 	{
-		sendPacket(chatMessage, connectedSocket.socket);
+		std::string command;
+		int pos = message.find(' ');
+		if(pos == -1)
+			command = message.substr(1, pos);
+		else
+			command = message.substr(1, pos - 1);
+
+		// Commands
+		if (strcmp(command.c_str(), "help") == 0)
+		{
+			chatMessage << ServerMessage::Command;
+			chatMessage << "******************************************************\nThe commands you can use are:\n-/list: show list of all users.\n-/kick: to disconnect some other user from the chat.\n-/whisper: to send a message only to one user.\n-/change_name: to change your username.\n******************************************************";
+			chatMessage << MessageType::Help;
+		}
+		else if (strcmp(command.c_str(), "list") == 0)
+		{
+			std::string userNames = "List of users:\n******************************************************\n";
+			for (auto& connectedSocket : connectedSockets)
+			{
+				userNames += connectedSocket.playerName + "\n";
+			}
+			userNames += "******************************************************";
+
+			chatMessage << ServerMessage::Command;
+			chatMessage << userNames;
+			chatMessage << MessageType::List;
+		}
+		else // Two or more words commands
+		{
+			int pos2 = message.find_last_of(" ") + 1;
+
+			if (pos2 != -1)
+			{
+				std::string name = message.substr(pos2, message.length());
+
+				// Change Name
+				if (strcmp(command.c_str(), "change_name") == 0)
+				{
+					if (IsNameAvailable(name.c_str()))
+					{
+						chatMessage << ServerMessage::ChangeName;
+						chatMessage << name;
+						chatMessage << MessageType::Info;
+
+						for (auto& connectedSocket : connectedSockets)
+						{
+							if (connectedSocket.socket == s)
+								connectedSocket.playerName = name;
+						}
+					}
+					else
+					{
+						chatMessage << ServerMessage::Command;
+						chatMessage << "Username already taken. Please try a new one";
+						chatMessage << MessageType::Error;
+					}
+					
+				}
+				else if (strcmp(command.c_str(), "kick") == 0)
+				{
+					OutputMemoryStream kickMessage;
+					bool userExist = false;
+					kickMessage << ServerMessage::Kick;
+					kickMessage << "You have been kicked by " + playerName;
+
+					for (auto& connectedSocket : connectedSockets)
+					{
+						if (strcmp(connectedSocket.playerName.c_str(), name.c_str()) == 0)
+						{
+							sendPacket(kickMessage, connectedSocket.socket);
+							userExist = true;
+						}
+					}
+
+					if (!userExist)
+					{
+						chatMessage << ServerMessage::Command;
+						chatMessage << "User not founded. Unable to kick";
+						chatMessage << MessageType::Error;
+					}
+					else
+						return;
+				}
+			}
+			else
+			{
+				chatMessage << ServerMessage::Command;
+				chatMessage << "Wrong command! If you need help write /help";
+				chatMessage << MessageType::Error;
+			}
+			
+		}
+
+		sendPacket(chatMessage, s);
+	}
+	else
+	{
+		chatMessage << ServerMessage::UserMessage;
+		chatMessage << playerName;
+		chatMessage << message;
+		chatMessage << MessageType::Message;
+		chatMessage << cPos;
+
+		for (auto& connectedSocket : connectedSockets)
+		{
+			sendPacket(chatMessage, connectedSocket.socket);
+		}
 	}
 }
 

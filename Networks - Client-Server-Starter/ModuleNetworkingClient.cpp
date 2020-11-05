@@ -54,6 +54,7 @@ bool ModuleNetworkingClient::update()
 		OutputMemoryStream packet;
 		packet << ClientMessage::Hello;
 		packet << playerName;
+		packet << colorPos;
 
 		if (sendPacket(packet, clientSocket))
 			state = ClientState::Logging;
@@ -119,16 +120,21 @@ bool ModuleNetworkingClient::gui()
 				ImGui::TextColored(colors[(*line).colorPos], "%s: ", (*line).pName.c_str()); ImGui::SameLine();
 				ImGui::TextColored(White, "%s", (*line).textMessage.c_str());
 				break;
+			case MessageType::Help:
+				ImGui::TextColored(Pink, "%s", (*line).textMessage.c_str());
+				break;
+			case MessageType::List:
+				ImGui::TextColored(DodgeBlue, "%s", (*line).textMessage.c_str());
+				break;
 			case MessageType::Connection:
-			{
 				ImGui::TextColored(LimeGreen, "         ****** %s joined ******", (*line).textMessage.c_str());
-			}
 				break;
 			case MessageType::Disconnection:
-			{
 				ImGui::TextColored(FirebrickRed, "         ****** %s left ******", (*line).textMessage.c_str());
-			}
 			break;
+			case MessageType::Error:
+				ImGui::TextColored(Red, "%s", (*line).textMessage.c_str());
+				break;
 			default:
 				break;
 			}
@@ -149,6 +155,9 @@ bool ModuleNetworkingClient::gui()
 			sendPacket(message, clientSocket);
 
 			memset(chatText, 0, MAX_CHAR);
+
+			//Continue focusing chat
+			ImGui::SetKeyboardFocusHere();
 		}
 
 		ImGui::End();
@@ -170,6 +179,15 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		break;
 	case ServerMessage::NotWelcome:
 		HandleNotWelcomeMessage(socket, packet);
+		break;
+	case ServerMessage::Command:
+		HandleServerMessage(socket, packet);
+		break;
+	case ServerMessage::ChangeName:
+		HandleChangeNameMessage(socket, packet);
+		break;
+	case ServerMessage::Kick:
+		HandleKickMessage(socket, packet);
 		break;
 	case ServerMessage::UserConnection:
 		HandleServerMessage(socket, packet);
@@ -200,6 +218,30 @@ void ModuleNetworkingClient::HandleServerMessage(SOCKET socket, const InputMemor
 	ChatText chatText = ChatText(message, type);
 	fuckingChat.push_back(chatText);
 	
+}
+
+void ModuleNetworkingClient::HandleChangeNameMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string name;
+	packet >> name;
+	playerName = name;
+	MessageType type;
+	packet >> type;
+
+	std::string message = "Name changed to " + name;
+
+	ChatText chatText = ChatText(message, type);
+	fuckingChat.push_back(chatText);
+}
+
+void ModuleNetworkingClient::HandleKickMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string message;
+	packet >> message;
+
+	WLOG("%s", message.c_str());
+
+	state = ClientState::Disconnected;
 }
 
 void ModuleNetworkingClient::HandleChatMessage(SOCKET socket, const InputMemoryStream& packet)

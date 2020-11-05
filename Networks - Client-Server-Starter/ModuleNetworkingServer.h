@@ -66,6 +66,7 @@ private:
 		sockaddr_in address;
 		SOCKET socket;
 		std::string playerName;
+		int colorPosition = 0;
 	};
 
 	std::vector<ConnectedSocket> connectedSockets;

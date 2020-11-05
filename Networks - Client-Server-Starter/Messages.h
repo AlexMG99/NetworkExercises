@@ -15,6 +15,9 @@ enum class ServerMessage
 {
 	Welcome,
 	NotWelcome,
+	Command,
+	ChangeName,
+	Kick,
 	UserConnection,
 	UserMessage,
 	UserDisconnection
@@ -25,6 +28,8 @@ enum class MessageType
 	Default,
 	Connection,
 	Disconnection,
+	Help,
+	List,
 	Info,
 	Message,
 	Warning,
