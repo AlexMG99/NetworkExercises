@@ -48,6 +48,8 @@ private:
 	void HandleUserConnectionMessage(SOCKET s, const char* pName);
 	void HandleUserDisconnectionMessage(SOCKET s, const InputMemoryStream& packet);
 
+	bool isNumber(std::string s);
+
 	//////////////////////////////////////////////////////////////////////
 	// State
 	//////////////////////////////////////////////////////////////////////

@@ -49,7 +49,7 @@ struct PokeBot
 		Pokemon(29, "Nidoran Hembra"),
 		Pokemon(30, "Nidorina"),
 		Pokemon(31, "Nidoqueen"),
-		Pokemon(32, "Nidroan Macho"),
+		Pokemon(32, "Nidoran Macho"),
 		Pokemon(33, "Nidorino"),
 		Pokemon(34, "Nidoking"),
 		Pokemon(35, "Clefairy"),

@@ -252,7 +252,7 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 			if (strcmp(pokeCommand.c_str(), "help") == 0)
 			{
 				chatMessage << ServerMessage::Command;
-				chatMessage << "******************************************************\nThe pokemon commands you can use are:\n-/p on: turns on the bot.\n-/p off: turns off the bot.\n-/p catch name: catch the last pokemon if named is guessed and you are the first one.\n-/p team: show your pokemon list.\n******************************************************";
+				chatMessage << "******************************************************\nThe pokemon commands you can use are:\n-/p on: turns on the bot.\n-/p off: turns off the bot.\n-/p catch name: catch the last pokemon if named is guessed and you are the first one.\n-/p team: show your pokemon list.\n-/p change_rand: change random percentage from 5 to 50\n******************************************************";
 				chatMessage << MessageType::Help;
 			}
 			else if (strcmp(pokeCommand.c_str(), "on") == 0)
@@ -356,6 +356,52 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 				chatMessage << ServerMessage::Command;
 				chatMessage << pokeTeam;
 				chatMessage << MessageType::Pokemon;
+			}
+			else if (strcmp(pokeCommand.c_str(), "change_rand") == 0)
+			{
+			int pokePos2 = afterCommand.find(' ');
+			std::string pokeNum = afterCommand.substr(pokePos2 + 1, afterCommand.length());;
+			if (pokePos != -1)
+			{
+				if (isNumber(pokeNum))
+				{
+					int num = std::stoi(pokeNum);
+					if (5 <= num && num <= 50)
+					{
+						pokebot.randPercetage = num;
+						chatMessage << ServerMessage::Command;
+						chatMessage << "Rand percentage changed to " + pokeNum;
+						chatMessage << MessageType::Pokemon;
+
+						for (auto& connectedSocket : connectedSockets)
+						{
+							if (connectedSocket.socket != s)
+							{
+								sendPacket(chatMessage, connectedSocket.socket);
+							}
+						}
+					}
+					else
+					{
+						chatMessage << ServerMessage::Command;
+						chatMessage << "Number has to be between 5 and 50.";
+						chatMessage << MessageType::Pokemon;
+					}
+				}
+				else
+				{
+					chatMessage << ServerMessage::Command;
+					chatMessage << "You did not write a number";
+					chatMessage << MessageType::Pokemon;
+				}
+				
+			}
+			else
+			{
+				chatMessage << ServerMessage::Command;
+				chatMessage << "You have to write a number, Ditto head!";
+				chatMessage << MessageType::Pokemon;
+			}
 			}
 			else
 			{
@@ -528,4 +574,13 @@ void ModuleNetworkingServer::HandleUserDisconnectionMessage(SOCKET s, const Inpu
 			sendPacket(message, connectedSocket.socket);
 	}
 
+}
+
+bool ModuleNetworkingServer::isNumber(std::string s)
+{
+	for (int i = 0; i < s.length(); i++)
+		if (isdigit(s[i]) == false)
+			return false;
+
+	return true;
 }
