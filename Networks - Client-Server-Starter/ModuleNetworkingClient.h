@@ -42,6 +42,7 @@ private:
 	void onSocketDisconnected(SOCKET socket) override;
 
 	void HandleServerMessage(SOCKET socket, const InputMemoryStream& packet);
+	void HandlePokemonSpawnMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandlePokemonCatchMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandleChangeNameMessage(SOCKET socket, const InputMemoryStream& packet);
 	void HandleKickMessage(SOCKET socket, const InputMemoryStream& packet);

@@ -15,6 +15,7 @@ struct PokeBot
 {
 	bool turnedOn = false;
 	Pokemon lastPokemon = Pokemon();
+	int randPercetage = 15;
 	std::vector<Pokemon> pokemons =
 	{
 		Pokemon(1, "Bulbasaur"),

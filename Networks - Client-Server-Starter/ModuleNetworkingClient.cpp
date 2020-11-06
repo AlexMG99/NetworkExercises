@@ -208,7 +208,7 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 		HandleServerMessage(socket, packet);
 		break;
 	case ServerMessage::PokeSpawn:
-		HandleServerMessage(socket, packet);
+		HandlePokemonSpawnMessage(socket, packet);
 		break;
 	case ServerMessage::PokeCatch:
 		HandlePokemonCatchMessage(socket, packet);
@@ -233,6 +233,19 @@ void ModuleNetworkingClient::HandleServerMessage(SOCKET socket, const InputMemor
 	ChatText chatText = ChatText(message, type);
 	fuckingChat.push_back(chatText);
 	
+}
+
+void ModuleNetworkingClient::HandlePokemonSpawnMessage(SOCKET socket, const InputMemoryStream& packet)
+{
+	std::string pokeMessage;
+	packet >> pokeMessage;
+	MessageType type;
+	packet >> type;
+
+	HandleChatMessage(socket, packet);
+
+	ChatText chatText = ChatText(pokeMessage, type);
+	fuckingChat.push_back(chatText);
 }
 
 void ModuleNetworkingClient::HandlePokemonCatchMessage(SOCKET socket, const InputMemoryStream& packet)

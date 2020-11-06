@@ -15,6 +15,6 @@ ImVec4 Yellow	= ImVec4(1, 1, 0, 1);
 ImVec4 Orange	= ImVec4(1, 0.64f, 0, 1);
 ImVec4 Purple	= ImVec4(0.62f, 0.13f, 0.94f, 1);
 ImVec4 Pink		= ImVec4(1, 0.75f, 0, 1);
-ImVec4 PokeColor = ImVec4(0.11f, 0.5f, 0.28f, 1.0f);
+ImVec4 PokeColor = ImVec4(0.24f, 0.49f, 0.79f, 1.0f);
 
 ImVec4 colors[MAX_COLORS] = { Blue, Red, Green, Yellow, Orange, Purple, Pink };

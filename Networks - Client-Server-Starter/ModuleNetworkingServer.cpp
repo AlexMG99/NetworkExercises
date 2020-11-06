@@ -324,7 +324,7 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 						else
 						{
 							chatMessage << ServerMessage::Command;
-							chatMessage << "You really wrote " + pokeName + " ? Are you pikablind or just dislexic?";
+							chatMessage << "You really wrote " + pokeName + "? Are you pikablind or just dislexic?";
 							chatMessage << MessageType::Pokemon;
 						}
 					}
@@ -465,19 +465,19 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 	}
 	else
 	{
-		bool pokemonSpawned = false;
-		OutputMemoryStream pokeMessage;
 #pragma region pokeSpawn
-	if (pokebot.turnedOn && (rand() % 100) < 50)
+	if (pokebot.turnedOn && (rand() % 100) < pokebot.randPercetage)
 	{
 		pokebot.lastPokemon = pokebot.pokemons[rand() % 150];
-		pokeMessage << ServerMessage::PokeSpawn;
-		pokeMessage << pokebot.lastPokemon.name + " has spawned! Type /p catch <pokemon_name> to catch it!";
-		pokeMessage << MessageType::Pokemon;
-		pokemonSpawned = true;
+		chatMessage << ServerMessage::PokeSpawn;
+		chatMessage << pokebot.lastPokemon.name + " has spawned! Type /p catch <pokemon_name> to catch it!";
+		chatMessage << MessageType::Pokemon;
+	}
+	else
+	{
+		chatMessage << ServerMessage::UserMessage;
 	}
 #pragma endregion
-		chatMessage << ServerMessage::UserMessage;
 		chatMessage << playerName;
 		chatMessage << message;
 		chatMessage << MessageType::Message;
@@ -486,8 +486,6 @@ void ModuleNetworkingServer::HandleChatMessage(SOCKET s, const InputMemoryStream
 		for (auto& connectedSocket : connectedSockets)
 		{
 			sendPacket(chatMessage, connectedSocket.socket);
-			if(pokemonSpawned)
-				sendPacket(pokeMessage, connectedSocket.socket);
 		}
 	}
 }
