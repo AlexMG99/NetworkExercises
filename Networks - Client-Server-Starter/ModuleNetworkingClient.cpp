@@ -105,7 +105,9 @@ bool ModuleNetworkingClient::gui()
 			state = ClientState::Disconnected;
 		}
 
-		ImGui::BeginChild("##ChatBox", ImVec2(ImGui::GetWindowContentRegionWidth(), ImGui::GetContentRegionAvail().y), true);
+		static bool focusBottom = false;
+
+		ImGui::BeginChild("##ChatBox", ImVec2(ImGui::GetWindowContentRegionWidth(), ImGui::GetContentRegionAvail().y - 30), true);
 		for (auto line = fuckingChat.begin(); line != fuckingChat.end(); ++line)
 		{
 			switch ((*line).mType)
@@ -147,20 +149,29 @@ bool ModuleNetworkingClient::gui()
 			
 		}
 
+		if (focusBottom)
+		{
+			ImGui::SetScrollHere(1.0f);
+			focusBottom = false;
+		}
 		ImGui::EndChild();
 
 		static char chatText[MAX_CHAR];
 		if (ImGui::InputText("Chat", chatText, IM_ARRAYSIZE(chatText), ImGuiInputTextFlags_EnterReturnsTrue))
 		{
-			OutputMemoryStream message;
-			message << ClientMessage::ChatMessage;
-			message << playerName;
-			message << chatText;
-			message << colorPos;
-			
-			sendPacket(message, clientSocket);
+			if (strcmp(chatText, "") != 0)
+			{
+				OutputMemoryStream message;
+				message << ClientMessage::ChatMessage;
+				message << playerName;
+				message << chatText;
+				message << colorPos;
 
-			memset(chatText, 0, MAX_CHAR);
+				sendPacket(message, clientSocket);
+
+				memset(chatText, 0, MAX_CHAR);
+				focusBottom = true;
+			}
 
 			//Continue focusing chat
 			ImGui::SetKeyboardFocusHere();
