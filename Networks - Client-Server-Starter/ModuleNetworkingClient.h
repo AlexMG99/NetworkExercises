@@ -84,5 +84,7 @@ private:
 	std::vector<Pokemon> pokeTeam;
 	std::vector<ChatText> fuckingChat;
 
+	bool focusBottom = false;
+
 };
 

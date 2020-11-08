@@ -105,8 +105,6 @@ bool ModuleNetworkingClient::gui()
 			state = ClientState::Disconnected;
 		}
 
-		static bool focusBottom = false;
-
 		ImGui::BeginChild("##ChatBox", ImVec2(ImGui::GetWindowContentRegionWidth(), ImGui::GetContentRegionAvail().y - 30), true);
 		for (auto line = fuckingChat.begin(); line != fuckingChat.end(); ++line)
 		{
@@ -227,6 +225,8 @@ void ModuleNetworkingClient::onSocketReceivedData(SOCKET socket, const InputMemo
 	default:
 		break;
 	}
+
+	focusBottom = true;
 }
 
 void ModuleNetworkingClient::onSocketDisconnected(SOCKET socket)
