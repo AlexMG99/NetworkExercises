@@ -1,5 +1,6 @@
 #include "Networks.h"
 #include "ReplicationManagerServer.h"
+#include "ModuleNetworking.h"
 
 // TODO(you): World state replication lab session
 
@@ -27,7 +28,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 
 	for(auto it = repCommands.begin(); it != repCommands.end(); ++it)
 	{
-		packet << (*it).second.networkId;
+		packet << (*it).first;
 		packet << (*it).second.action;
 
 		switch ((*it).second.action)
@@ -35,8 +36,10 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		case ReplicationAction::Create:
 		{
 			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).second.networkId);
-			// Serialize position, angle, collider, behaviour,
-			// GO->behaviour->write(packet);
+			// Serialize position, angle, spaceshiptype
+			packet << GO->position.x;
+			packet << GO->position.y;
+			packet << GO->angle;
 		}
 		break;
 		case ReplicationAction::Update:
@@ -51,7 +54,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		}
 
 		// Clear/Remove the replication command
-		repCommands.erase(it);
+		
 	}
-	
+	repCommands.clear();
 }

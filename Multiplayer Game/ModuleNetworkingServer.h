@@ -105,7 +105,7 @@ private:
 
 	DelayedDestroyEntry netGameObjectsToDestroyWithDelay[MAX_GAME_OBJECTS] = {};
 
-
+	ReplicationManagerServer repManagerServer;
 
 	//////////////////////////////////////////////////////////////////////
 	// State
@@ -125,6 +125,7 @@ private:
 
 	// TODO(you): UDP virtual connection lab session
 	float secondsSinceLastPing = 0.0f;
+	float secondsSinceLastSentPackage = 0.0f;
 };
 
 

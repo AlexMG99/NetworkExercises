@@ -3,14 +3,14 @@
 
 // TODO(you): World state replication lab session :_)
 
-void ReplicationManagerClient::read(InputMemoryStream& packet)
+void ReplicationManagerClient::read(const InputMemoryStream& packet)
 {
-	while ((int)packet.RemainingByteCount() <= 0)
+	while ((int)packet.RemainingByteCount() > 0)
 	{
 		uint32 networkId;
-		packet.Read(networkId);
+		packet >> networkId;
 		ReplicationAction action;
-		packet.Read(action);
+		packet >> action;
 
 		switch (action)
 		{
@@ -19,6 +19,9 @@ void ReplicationManagerClient::read(InputMemoryStream& packet)
 			GameObject* GO = App->modGameObject->Instantiate();
 			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(GO, networkId);
 			// Deserialize fields
+			packet >> GO->position.x;
+			packet >> GO->position.y;
+			packet >> GO->angle;
 		}
 		break;
 		case ReplicationAction::Update:

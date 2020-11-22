@@ -146,6 +146,10 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 					
 					// TODO(you): World state replication lab session
+					OutputMemoryStream packet;
+					packet << PROTOCOL_ID;
+					repManagerServer.write(packet);
+					sendPacket(packet, proxy->address);
 				}
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -218,6 +222,7 @@ void ModuleNetworkingServer::onUpdate()
 
 		// Increase secondsLastPackageTime
 		secondsSinceLastPing += Time.deltaTime;
+		secondsSinceLastSentPackage += Time.deltaTime;
 
 		for (ClientProxy &clientProxy : clientProxies)
 		{
@@ -228,7 +233,7 @@ void ModuleNetworkingServer::onUpdate()
 				{
 					OutputMemoryStream packet;
 					packet << PROTOCOL_ID;
-					packet << ClientMessage::Ping;
+					packet << ServerMessage::Ping;
 					sendPacket(packet, clientProxy.address);
 				}
 
@@ -239,6 +244,13 @@ void ModuleNetworkingServer::onUpdate()
 				}
 
 				// TODO(you): World state replication lab session
+				if (secondsSinceLastSentPackage > MAX_NETWORK_DELAY_SECONDS)
+				{
+					OutputMemoryStream packet;
+					packet << PROTOCOL_ID;
+					repManagerServer.write(packet);
+					sendPacket(packet, clientProxy.address);
+				}
 
 				// Increase timeSinceLastPacketRecieved
 				clientProxy.timeSinceLastPacketRecieved += Time.deltaTime;
@@ -253,6 +265,8 @@ void ModuleNetworkingServer::onUpdate()
 		// Set Ping time to 0
 		if (secondsSinceLastPing >= PING_INTERVAL_SECONDS)
 			secondsSinceLastPing = 0.0f;
+		if (secondsSinceLastSentPackage >= MAX_NETWORK_DELAY_SECONDS)
+			secondsSinceLastSentPackage = 0.0f;
 		
 	}
 }
@@ -392,6 +406,7 @@ GameObject * ModuleNetworkingServer::instantiateNetworkObject()
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			repManagerServer.create(gameObject->networkId);
 		}
 	}
 
@@ -406,6 +421,7 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			repManagerServer.update(clientProxies[i].gameObject->networkId);
 		}
 	}
 }
@@ -418,6 +434,7 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
+			repManagerServer.destroy(clientProxies[i].gameObject->networkId);
 		}
 	}
 
