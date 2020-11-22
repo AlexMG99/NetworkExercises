@@ -49,7 +49,7 @@ void ModuleNetworkingClient::onStart()
 	inputDataFront = 0;
 	inputDataBack = 0;
 
-	secondsSinceLastHello = 9999.0f;
+	secondsSinceLastPackage = 9999.0f;
 	secondsSinceLastInputDelivery = 0.0f;
 }
 
@@ -133,23 +133,23 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 
 		// TODO(you): Reliability on top of UDP lab session
 	}
+
+	secondsSinceLastPackage = 0.0f;
 }
 
 void ModuleNetworkingClient::onUpdate()
 {
 	if (state == ClientState::Stopped) return;
 
-
 	// TODO(you): UDP virtual connection lab session
-
 
 	if (state == ClientState::Connecting)
 	{
-		secondsSinceLastHello += Time.deltaTime;
+		secondsSinceLastPackage += Time.deltaTime;
 
-		if (secondsSinceLastHello > 0.1f)
+		if (secondsSinceLastPackage > 0.1f)
 		{
-			secondsSinceLastHello = 0.0f;
+			secondsSinceLastPackage = 0.0f;
 
 			OutputMemoryStream packet;
 			packet << PROTOCOL_ID;
@@ -162,7 +162,26 @@ void ModuleNetworkingClient::onUpdate()
 	}
 	else if (state == ClientState::Connected)
 	{
-		// TODO(you): UDP virtual connection lab session
+		// Increae time to secondsSinceLastPackage
+		secondsSinceLastPackage += Time.deltaTime;
+
+		// TODO(you): Check if TIMEOUT greater than secondsSinceLastPackage
+		if (secondsSinceLastPackage >= DISCONNECT_TIMEOUT_SECONDS)
+		{
+			WLOG("ModuleNetworkingClient::onUpdate() - TimeOut :-(");
+			disconnect();
+		}
+
+		secondsSinceLastPing += Time.deltaTime;
+		if (secondsSinceLastPing >= PING_INTERVAL_SECONDS)
+		{
+			OutputMemoryStream packet;
+			packet << PROTOCOL_ID;
+			packet << ClientMessage::Ping;
+			sendPacket(packet, serverAddress);
+
+			secondsSinceLastPing = 0.0f;
+		}
 
 		// Process more inputs if there's space
 		if (inputDataBack - inputDataFront < ArrayCount(inputData))

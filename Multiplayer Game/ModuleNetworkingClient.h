@@ -64,7 +64,8 @@ private:
 
 	// Connecting stage
 
-	float secondsSinceLastHello = 0.0f;
+	float secondsSinceLastPackage = 0.0f;
+	float secondsSinceLastPing = 0.0f;
 
 
 	// Input ///////////
