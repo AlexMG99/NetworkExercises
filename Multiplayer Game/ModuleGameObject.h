@@ -38,6 +38,9 @@ struct GameObject
 	};
 	State state = NON_EXISTING;
 
+	void read(const InputMemoryStream& packet);
+	void write(OutputMemoryStream& packet);
+
 private:
 
 	void * operator new(size_t size) = delete;

@@ -35,18 +35,18 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		{
 		case ReplicationAction::Create:
 		{
-			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).second.networkId);
-			// Serialize position, angle, spaceshiptype
-			packet << GO->position.x;
-			packet << GO->position.y;
-			packet << GO->angle;
+			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).first);
+			// Serialize GO
+			GO->write(packet);
+			GO->sprite->write(packet);
+
 		}
 		break;
 		case ReplicationAction::Update:
 		{
-			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).second.networkId);
+			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).first);
 			// Serialize position, angle, collider, behaviour,
-			// GO->behaviour->write(packet);
+			GO->write(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

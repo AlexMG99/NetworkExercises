@@ -8,6 +8,9 @@ struct Texture
 	const char *filename = "";
 	vec2 size = vec2{ -1.0f };
 	bool used = false;
+
+	void read(const InputMemoryStream& packet);
+	void write(OutputMemoryStream& packet);
 };
 
 class ModuleTextures : public Module

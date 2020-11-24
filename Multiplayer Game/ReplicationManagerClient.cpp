@@ -19,15 +19,16 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			GameObject* GO = App->modGameObject->Instantiate();
 			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(GO, networkId);
 			// Deserialize fields
-			packet >> GO->position.x;
-			packet >> GO->position.y;
-			packet >> GO->angle;
+			GO->read(packet);
+			// TODO ALEX: Sprite creation dirty
+			GO->sprite = new Sprite();
+			GO->sprite->read(packet);
 		}
 		break;
 		case ReplicationAction::Update:
 		{
 			GameObject* GO = App->modLinkingContext->getNetworkGameObject(networkId);
-			// Deserialize fields
+			GO->read(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

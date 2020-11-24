@@ -1,4 +1,5 @@
 #include "Networks.h"
+#include "ModuleTextures.h"
 
 
 extern ID3D11Device *g_pd3dDevice;
@@ -186,4 +187,27 @@ Texture & ModuleTextures::getTextureSlotForFilename(const char *filename)
 	// Else... add a new texture slot
 	static Texture texture;
 	return texture;
+}
+
+void Texture::read(const InputMemoryStream& packet)
+{
+	// Name
+	std::string fileN;
+	packet >> fileN;
+	filename = fileN.data();
+
+	// Size
+	packet >> size.x;
+	packet >> size.y;
+}
+
+void Texture::write(OutputMemoryStream& packet)
+{
+	// Name
+	std::string fileN = filename;
+	packet << fileN;
+
+	// Size
+	packet << size.x;
+	packet << size.y;
 }

@@ -757,3 +757,47 @@ void ModuleRender::CleanupRenderTarget()
 		g_mainRenderTargetView = NULL;
 	}
 }
+
+void Sprite::read(const InputMemoryStream& packet)
+{
+	// Color
+	packet >> color.x;
+	packet >> color.y;
+	packet >> color.z;
+	packet >> color.a;
+
+	// Pivot
+	packet >> pivot.x;
+	packet >> pivot.y;
+
+	// Order
+	packet >> order;
+
+	// Texture
+	std::string fileN;
+	packet >> fileN;
+
+	texture = App->modTextures->loadTexture(fileN.c_str());
+
+	packet >> texture->size.x;
+	packet >> texture->size.y;
+}
+
+void Sprite::write(OutputMemoryStream& packet)
+{
+	// Color
+	packet << color.x;
+	packet << color.y;
+	packet << color.z;
+	packet << color.a;
+
+	// Pivot
+	packet << pivot.x;
+	packet << pivot.y;
+
+	// Order
+	packet << order;
+
+	// Texture
+	texture->write(packet);
+}
