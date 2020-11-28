@@ -191,11 +191,6 @@ Texture & ModuleTextures::getTextureSlotForFilename(const char *filename)
 
 void Texture::read(const InputMemoryStream& packet)
 {
-	// Name
-	std::string fileN;
-	packet >> fileN;
-	filename = fileN.data();
-
 	// Size
 	packet >> size.x;
 	packet >> size.y;

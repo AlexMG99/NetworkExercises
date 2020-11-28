@@ -779,8 +779,7 @@ void Sprite::read(const InputMemoryStream& packet)
 
 	texture = App->modTextures->loadTexture(fileN.c_str());
 
-	packet >> texture->size.x;
-	packet >> texture->size.y;
+	texture->read(packet);
 }
 
 void Sprite::write(OutputMemoryStream& packet)

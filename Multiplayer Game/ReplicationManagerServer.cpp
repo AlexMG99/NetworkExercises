@@ -38,8 +38,22 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).first);
 			// Serialize GO
 			GO->write(packet);
-			GO->sprite->write(packet);
 
+			packet << GO->behaviour->type();
+			std::string fName = GO->sprite->texture->filename;
+			packet << fName;
+
+			bool hasCollider = false;
+
+			if (GO->collider)
+			{
+				hasCollider = true;
+				packet << hasCollider;
+				packet << GO->collider->type;
+				packet << GO->collider->isTrigger;
+			}
+			else
+				packet << hasCollider;
 		}
 		break;
 		case ReplicationAction::Update:

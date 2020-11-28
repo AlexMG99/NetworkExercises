@@ -123,6 +123,7 @@ void Destroy(GameObject * gameObject, float delaySeconds)
 	ModuleGameObject::Destroy(gameObject, delaySeconds);
 }
 
+
 void GameObject::read(const InputMemoryStream& packet)
 {
 	// Transform
@@ -131,6 +132,7 @@ void GameObject::read(const InputMemoryStream& packet)
 	packet >> size.x;
 	packet >> size.y;
 	packet >> angle;
+
 }
 
 void GameObject::write(OutputMemoryStream& packet)
@@ -141,4 +143,5 @@ void GameObject::write(OutputMemoryStream& packet)
 	packet << size.x;
 	packet << size.y;
 	packet << angle;
+
 }
