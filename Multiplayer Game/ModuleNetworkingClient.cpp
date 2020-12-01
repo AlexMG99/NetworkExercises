@@ -137,7 +137,6 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		else if (message == ServerMessage::Input) // TODO(you): Reliability on top of UDP lab session
 		{
 			packet >> inputDataFront;
-			LOG("Input data front: %i", inputDataFront);
 		}
 		
 	}
@@ -226,7 +225,7 @@ void ModuleNetworkingClient::onUpdate()
 			}
 
 			// Clear the queue
-			inputDataFront = inputDataBack;
+			//inputDataFront = inputDataBack;
 
 			sendPacket(packet, serverAddress);
 		}
