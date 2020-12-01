@@ -3,6 +3,15 @@
 
 // TODO(you): World state replication lab session :_)
 
+// Dudas:
+//	1. Cuando se dispara el laser, la nave muere. Se borra del cliente, no se deconecta del cliente y en el server no pasa nada
+//		1.1 El collider se actualiza solo? Se tiene que mover?
+//		1.2 Por que cuando muere no se desconecta? Por que el servidor sigue teniendo nave?
+//	2. Cuando desaparece la nave, y se clica un input, el codigo peta, pq la nave esta muerta.
+//		2.1 Debería desconectar al cliente del server pq ha muerto.
+
+//	3. No sabemos como debugar si lo del input esta bien
+
 void ReplicationManagerClient::read(const InputMemoryStream& packet)
 {
 	while ((int)packet.RemainingByteCount() > 0)

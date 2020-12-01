@@ -134,7 +134,12 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			repManagerClient.read(packet);
 		}
-		// TODO(you): Reliability on top of UDP lab session
+		else if (message == ServerMessage::Input) // TODO(you): Reliability on top of UDP lab session
+		{
+			packet >> inputDataFront;
+			LOG("Input data front: %i", inputDataFront);
+		}
+		
 	}
 
 	secondsSinceLastPackage = 0.0f;

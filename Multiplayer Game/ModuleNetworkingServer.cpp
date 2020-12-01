@@ -180,15 +180,26 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					packet >> inputData.verticalAxis;
 					packet >> inputData.buttonBits;
 
-					if (inputData.sequenceNumber >= proxy->nextExpectedInputSequenceNumber)
+					if (inputData.sequenceNumber >= proxy->nextExpectedInputSequenceNumber 
+						/*&& inputData.sequenceNumber > proxy->lastInputSequenceNumber*/)
 					{
 						proxy->gamepad.horizontalAxis = inputData.horizontalAxis;
 						proxy->gamepad.verticalAxis = inputData.verticalAxis;
 						unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
 						proxy->gameObject->behaviour->onInput(proxy->gamepad);
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
+						//proxy->lastInputSequenceNumber = inputData.sequenceNumber;
 					}
 				}
+
+				// Send last input package recieved
+				/*OutputMemoryStream outPacket;
+				outPacket << PROTOCOL_ID;
+				outPacket << ServerMessage::Input;
+				outPacket << proxy->lastInputSequenceNumber;
+				LOG("Last sequence number: %i", proxy->lastInputSequenceNumber);
+
+				sendPacket(outPacket, fromAddress);*/
 			}
 		}
 		else if (message == ClientMessage::Ping)

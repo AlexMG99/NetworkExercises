@@ -55,6 +55,7 @@ private:
 		// TODO(you): World state replication lab session
 		ReplicationManagerServer repManagerClient;
 		// TODO(you): Reliability on top of UDP lab session
+		uint32 lastInputSequenceNumber = 0;
 
 		uint32 nextExpectedInputSequenceNumber = 0;
 		InputController gamepad;
