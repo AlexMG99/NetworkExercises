@@ -24,8 +24,6 @@ void ReplicationManagerServer::destroy(uint32 networkId)
 
 void ReplicationManagerServer::write(OutputMemoryStream& packet)
 {
-	packet << ServerMessage::Replication;
-
 	for(auto it = repCommands.begin(); it != repCommands.end(); ++it)
 	{
 		packet << (*it).first;

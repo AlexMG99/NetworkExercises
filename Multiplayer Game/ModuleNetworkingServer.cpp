@@ -146,10 +146,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 					
 					// TODO(you): World state replication lab session
-					OutputMemoryStream packet;
-					packet << PROTOCOL_ID;
-					repManagerServer.write(packet);
-					sendPacket(packet, proxy->address);
+					repManagerServer.create(gameObject->networkId);
 				}
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -188,17 +185,8 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 						unpackInputControllerButtons(inputData.buttonBits, proxy->gamepad);
 						proxy->gameObject->behaviour->onInput(proxy->gamepad);
 						proxy->nextExpectedInputSequenceNumber = inputData.sequenceNumber + 1;
-						proxy->lastInputSequenceNumber = inputData.sequenceNumber;
 					}
 				}
-
-				// Send last input package recieved
-				OutputMemoryStream outPacket;
-				outPacket << PROTOCOL_ID;
-				outPacket << ServerMessage::Input;
-				outPacket << proxy->lastInputSequenceNumber;
-
-				sendPacket(outPacket, fromAddress);
 			}
 		}
 		else if (message == ClientMessage::Ping)
@@ -207,6 +195,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			{
 				LOG("Ping Packet Recieved owo");
 				proxy->timeSinceLastPacketRecieved = 0.0f;
+				proxy->deliveryManager.processAckdSequenceNumbers(packet);
 			}
 		}
 	}
@@ -258,7 +247,16 @@ void ModuleNetworkingServer::onUpdate()
 				{
 					OutputMemoryStream packet;
 					packet << PROTOCOL_ID;
+					packet << ServerMessage::Replication;
+					packet << clientProxy.nextExpectedInputSequenceNumber - 1;
+					Delivery* delivery = clientProxy.deliveryManager.writeSequenceNumber(packet);
+
+					if (delivery)
+					{
+						// TODO: On Succes and OnFailure delegate
+					}
 					repManagerServer.write(packet);
+
 					sendPacket(packet, clientProxy.address);
 				}
 

@@ -56,6 +56,7 @@ private:
 		ReplicationManagerServer repManagerClient;
 		// TODO(you): Reliability on top of UDP lab session
 		uint32 lastInputSequenceNumber = 0;
+		DeliveryManager deliveryManager;
 
 		uint32 nextExpectedInputSequenceNumber = 0;
 		InputController gamepad;
