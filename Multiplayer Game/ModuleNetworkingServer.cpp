@@ -146,7 +146,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					GameObject *gameObject = networkGameObjects[i];
 					
 					// TODO(you): World state replication lab session
-					repManagerServer.create(gameObject->networkId);
+					clientProxies[i].repManagerServer.create(gameObject->networkId);
 				}
 
 				LOG("Message received: hello - from player %s", proxy->name.c_str());
@@ -255,7 +255,7 @@ void ModuleNetworkingServer::onUpdate()
 					{
 						// TODO: On Succes and OnFailure delegate
 					}
-					repManagerServer.write(packet);
+					clientProxy.repManagerServer.write(packet);
 
 					sendPacket(packet, clientProxy.address);
 				}
@@ -414,7 +414,7 @@ GameObject * ModuleNetworkingServer::instantiateNetworkObject()
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
-			repManagerServer.create(gameObject->networkId);
+			clientProxies[i].repManagerServer.create(gameObject->networkId);
 		}
 	}
 
@@ -429,7 +429,7 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
-			repManagerServer.update(clientProxies[i].gameObject->networkId);
+			clientProxies[i].repManagerServer.update(gameObject->networkId);
 		}
 	}
 }
@@ -442,7 +442,7 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		if (clientProxies[i].connected)
 		{
 			// TODO(you): World state replication lab session
-			repManagerServer.destroy(clientProxies[i].gameObject->networkId);
+			clientProxies[i].repManagerServer.destroy(gameObject->networkId);
 		}
 	}
 

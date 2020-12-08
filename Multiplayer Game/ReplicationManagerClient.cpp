@@ -67,14 +67,14 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 
 	go->sprite = App->modRender->addSprite(go);
 
+	// Create behaviour
+	Behaviour* spaceshipBehaviour = App->modBehaviour->addBehaviour(bType, go);
+
 	switch (bType)
 	{
 	case BehaviourType::Spaceship:
 	{
-		// Create behaviour
-		Spaceship* spaceshipBehaviour = App->modBehaviour->addSpaceship(go);
-		go->behaviour = spaceshipBehaviour;
-		go->behaviour->isServer = false;
+		//go->behaviour->isServer = false;
 
 		go->sprite->order = 5;
 
@@ -94,8 +94,7 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 	break;
 	case BehaviourType::Laser:
 	{
-		Laser* laserBehaviour = App->modBehaviour->addLaser(go);
-		laserBehaviour->isServer = false;
+		//laserBehaviour->isServer = false;
 
 		go->sprite->texture = App->modResources->laser;
 		go->sprite->order = 3;
