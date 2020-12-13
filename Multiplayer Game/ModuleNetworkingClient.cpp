@@ -133,10 +133,23 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		if (message == ServerMessage::Replication)
 		{
 			packet >> inputDataFront;
-			/*uint32 sequenceNumber;
-			packet >> sequenceNumber;*/
-			if(deliveryManager.processSequenceNumber(packet))
+			if (deliveryManager.processSequenceNumber(packet))
+			{
 				repManagerClient.read(packet);
+
+				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+				if (playerGameObject == nullptr)
+					return;
+
+				InputController prevController;
+				prevController = inputControllerFromInputPacketData(inputData[inputDataFront % ArrayCount(inputData)], prevController);
+
+				for (int i = inputDataFront + 1; i < inputDataBack; ++i)
+				{
+					prevController = inputControllerFromInputPacketData(inputData[i % ArrayCount(inputData)], prevController);
+					playerGameObject->behaviour->onInput(prevController);
+				}
+			}
 		}
 		
 	}
@@ -201,6 +214,10 @@ void ModuleNetworkingClient::onUpdate()
 			inputPacketData.horizontalAxis = Input.horizontalAxis;
 			inputPacketData.verticalAxis = Input.verticalAxis;
 			inputPacketData.buttonBits = packInputControllerButtons(Input);
+
+			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+			if (playerGameObject)
+				playerGameObject->behaviour->onInput(Input);
 		}
 
 		secondsSinceLastInputDelivery += Time.deltaTime;

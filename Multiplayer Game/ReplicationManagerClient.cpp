@@ -57,54 +57,74 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 	// Transform
 	go->read(packet);
 
-	// Behaviour
-	BehaviourType bType;
-	packet >> bType;
-
 	// Texture name
 	std::string fName;
 	packet >> fName;
 
 	go->sprite = App->modRender->addSprite(go);
 
-	// Create behaviour
-	Behaviour* spaceshipBehaviour = App->modBehaviour->addBehaviour(bType, go);
-
-	switch (bType)
+	// Behaviour
+	bool hasBehaviour;
+	packet >> hasBehaviour;
+	
+	if (hasBehaviour)
 	{
-	case BehaviourType::Spaceship:
-	{
-		//go->behaviour->isServer = false;
+		BehaviourType bType;
+		packet >> bType;
 
-		go->sprite->order = 5;
+		// Create behaviour
+		Behaviour* behaviour = App->modBehaviour->addBehaviour(bType, go);
 
-		if (strcmp(fName.c_str(), "spacecraft1.png") == 0)
+		switch (bType)
 		{
-			go->sprite->texture = App->modResources->spacecraft1;
+		case BehaviourType::Spaceship:
+		{
+			//go->behaviour->isServer = false;
+
+			go->sprite->order = 5;
+
+			if (strcmp(fName.c_str(), "spacecraft1.png") == 0)
+			{
+				go->sprite->texture = App->modResources->spacecraft1;
+			}
+			else if (strcmp(fName.c_str(), "spacecraft2.png") == 0)
+			{
+				go->sprite->texture = App->modResources->spacecraft2;
+			}
+			else if (strcmp(fName.c_str(), "spacecraft3.png") == 0)
+			{
+				go->sprite->texture = App->modResources->spacecraft3;
+			}
 		}
-		else if (strcmp(fName.c_str(), "spacecraft2.png") == 0)
+		break;
+		case BehaviourType::Laser:
 		{
-			go->sprite->texture = App->modResources->spacecraft2;
+			//laserBehaviour->isServer = false;
+
+			go->sprite->texture = App->modResources->laser;
+			go->sprite->order = 3;
 		}
-		else if (strcmp(fName.c_str(), "spacecraft3.png") == 0)
+		break;
+		case BehaviourType::None:
 		{
-			go->sprite->texture = App->modResources->spacecraft3;
+			LOG("No Type");
+		}
+		break;
 		}
 	}
-	break;
-	case BehaviourType::Laser:
-	{
-		//laserBehaviour->isServer = false;
 
-		go->sprite->texture = App->modResources->laser;
-		go->sprite->order = 3;
-	}
-	break;
-	case BehaviourType::None:
+	// Texture
+	if (strcmp(fName.c_str(), "explosion1.png") == 0)
 	{
-		LOG("No Type");
-	}
-	break;
+		go->sprite->texture = App->modResources->explosion1;
+		go->sprite->order = 100;
+
+		go->animation = App->modRender->addAnimation(go);
+		go->animation->clip = App->modResources->explosionClip;
+
+		//NetworkDestroy(go, 2.0f);
+
+		App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 	}
 	
 	// Collider
@@ -123,27 +143,4 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 
 		go->collider->isTrigger = isTrigger;
 	}
-	
-
-	//// Create sprite
-	//gameObject->sprite = App->modRender->addSprite(gameObject);
-	//go->sprite->order = 5;
-	//if (spaceshipType == 0) {
-	//	gameObject->sprite->texture = App->modResources->spacecraft1;
-	//}
-	//else if (spaceshipType == 1) {
-	//	gameObject->sprite->texture = App->modResources->spacecraft2;
-	//}
-	//else {
-	//	gameObject->sprite->texture = App->modResources->spacecraft3;
-	//}
-
-	//// Create collider
-	//gameObject->collider = App->modCollision->addCollider(ColliderType::Player, gameObject);
-	//gameObject->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
-
-	//// Create behaviour
-	//Spaceship* spaceshipBehaviour = App->modBehaviour->addSpaceship(gameObject);
-	//gameObject->behaviour = spaceshipBehaviour;
-	//gameObject->behaviour->isServer = true;
 }

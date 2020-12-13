@@ -37,10 +37,18 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			// Serialize GO
 			GO->write(packet);
 
-			packet << GO->behaviour->type();
+			// Sprite
 			std::string fName = GO->sprite->texture->filename;
 			packet << fName;
 
+			// Behaviour
+			bool hasBehaviour = (GO->behaviour != nullptr) ? true : false;
+			packet << hasBehaviour;
+
+			if (hasBehaviour)
+				packet << GO->behaviour->type();
+
+			// Collider
 			bool hasCollider = false;
 
 			if (GO->collider)
