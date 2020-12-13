@@ -122,8 +122,6 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 		go->animation = App->modRender->addAnimation(go);
 		go->animation->clip = App->modResources->explosionClip;
 
-		//NetworkDestroy(go, 2.0f);
-
 		App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 	}
 	
