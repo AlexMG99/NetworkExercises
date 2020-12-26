@@ -166,7 +166,7 @@ void GameObject::write(OutputMemoryStream& packet)
 
 void GameObject::interpolate()
 {
-	float t = MAX_NETWORK_DELAY_SECONDS;
+	float t = secondsElapsed / MAX_NETWORK_DELAY_SECONDS;
 
 	if (t < 1)
 	{
