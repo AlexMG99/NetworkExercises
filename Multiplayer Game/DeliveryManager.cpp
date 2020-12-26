@@ -52,8 +52,8 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 		{
 			if ((*it)->sequenceNumber == sequenceNumber)
 			{
-				//(*it)->delegate->OnDeliverySuccess(this);
-				//delete (*it)->delegate;
+				(*it)->delegate->OnDeliverySuccess(this);
+				delete (*it)->delegate;
 				delete* it;
 				it = pendingDeliveries.erase(it);
 			}
@@ -69,8 +69,8 @@ void DeliveryManager::processTimedOutPackets()
 	{
 		if (Time.time - (*it)->dispatchTime >= PACKET_DELIVERY_TIMEOUT_SECONDS)
 		{
-			//(*it)->delegate->OnDeliveryFailure(this);
-			//delete (*it)->delegate;
+			(*it)->delegate->OnDeliveryFailure(this);
+			delete (*it)->delegate;
 			delete* it;
 			it = pendingDeliveries.erase(it);
 		}
@@ -79,7 +79,7 @@ void DeliveryManager::processTimedOutPackets()
 	}
 }
 
-RepDeliveryManager::RepDeliveryManager(ReplicationManagerServer* repManager)
+RepDeliveryDelegate::RepDeliveryDelegate(ReplicationManagerServer* repManager)
 {
 	repManagerServer = repManager;
 	for (std::unordered_map<uint32, ReplicationCommand>::iterator it_com = repManagerServer->repCommands.begin(); it_com != repManagerServer->repCommands.end(); ++it_com)
@@ -88,7 +88,7 @@ RepDeliveryManager::RepDeliveryManager(ReplicationManagerServer* repManager)
 	}
 }
 
-void RepDeliveryManager::OnDeliveryFailure(DeliveryManager* deliveryManager)
+void RepDeliveryDelegate::OnDeliveryFailure(DeliveryManager* deliveryManager)
 {
 	for (std::vector<ReplicationCommand>::iterator it_com = commands.begin(); it_com != commands.end(); ++it_com)
 	{

@@ -12,10 +12,10 @@ public:
 	virtual void OnDeliveryFailure(DeliveryManager* deliveryManager) = 0;
 };
 
-class RepDeliveryManager: public DeliveryDelegate
+class RepDeliveryDelegate: public DeliveryDelegate
 {
 public:
-	RepDeliveryManager(ReplicationManagerServer* repManager);
+	RepDeliveryDelegate(ReplicationManagerServer* repManager);
 
 	void OnDeliverySuccess(DeliveryManager* deliveryManager) {};
 	void OnDeliveryFailure(DeliveryManager* deliveryManager);

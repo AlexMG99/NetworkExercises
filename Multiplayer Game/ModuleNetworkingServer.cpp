@@ -243,7 +243,7 @@ void ModuleNetworkingServer::onUpdate()
 				}
 
 				// TODO(you): World state replication lab session
-				if (secondsSinceLastSentPackage > MAX_NETWORK_DELAY_SECONDS)
+				if (secondsSinceLastSentPackage >= MAX_NETWORK_DELAY_SECONDS)
 				{
 					OutputMemoryStream packet;
 					packet << PROTOCOL_ID;
@@ -253,7 +253,7 @@ void ModuleNetworkingServer::onUpdate()
 
 					if (delivery)
 					{
-						//delivery->delegate = new RepDeliveryManager(&clientProxy.repManagerServer);
+						delivery->delegate = new RepDeliveryDelegate(&clientProxy.repManagerServer);
 					}
 					clientProxy.repManagerServer.write(packet);
 
