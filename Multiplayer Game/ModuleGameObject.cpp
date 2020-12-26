@@ -124,7 +124,7 @@ void Destroy(GameObject * gameObject, float delaySeconds)
 }
 
 
-void GameObject::read(const InputMemoryStream& packet)
+void GameObject::createRead(const InputMemoryStream& packet)
 {
 	// Transform
 	packet >> position.x;
@@ -132,6 +132,24 @@ void GameObject::read(const InputMemoryStream& packet)
 	packet >> size.x;
 	packet >> size.y;
 	packet >> angle;
+
+	initial_position = final_position = position;
+	initial_angle = final_angle = angle;
+}
+
+void GameObject::read(const InputMemoryStream& packet)
+{
+	// Transform
+	packet >> final_position.x;
+	packet >> final_position.y;
+	packet >> size.x;
+	packet >> size.y;
+	packet >> final_angle;
+
+	initial_position = position;
+	initial_angle = angle;
+
+	secondsElapsed = 0.0f;
 
 }
 
@@ -144,4 +162,17 @@ void GameObject::write(OutputMemoryStream& packet)
 	packet << size.y;
 	packet << angle;
 
+}
+
+void GameObject::interpolate()
+{
+	float t = MAX_NETWORK_DELAY_SECONDS;
+
+	if (t < 1)
+	{
+		position = lerp(initial_position, final_position, t);
+		angle = lerp(initial_angle, final_angle, t);
+
+		secondsElapsed += Time.deltaTime;
+	}
 }

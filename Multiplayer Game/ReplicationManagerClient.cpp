@@ -55,7 +55,7 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 void ReplicationManagerClient::createObject(const InputMemoryStream& packet, GameObject* go)
 {
 	// Transform
-	go->read(packet);
+	go->createRead(packet);
 
 	// Texture name
 	std::string fName;

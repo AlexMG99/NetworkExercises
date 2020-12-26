@@ -260,6 +260,17 @@ void ModuleNetworkingClient::onUpdate()
 		{
 			// This means that the player has been destroyed (e.g. killed)
 		}
+
+		// Interpolation of other objects
+		uint16 objCount = 0;
+		GameObject* networkGameObjects[MAX_NETWORK_OBJECTS] = {};
+		App->modLinkingContext->getNetworkGameObjects(networkGameObjects, &objCount);
+
+		for (int i = 0; i < objCount; ++i)
+		{
+			if (networkGameObjects[i]->networkId != networkId)
+				networkGameObjects[i]->interpolate();
+		}
 	}
 }
 

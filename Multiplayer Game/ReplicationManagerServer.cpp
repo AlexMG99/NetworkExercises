@@ -75,7 +75,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		}
 
 		// Clear/Remove the replication command
-		
+		it->second.action = ReplicationAction::None;
 	}
-	repCommands.clear();
 }

@@ -5,8 +5,17 @@ struct GameObject
 	uint32 id;
 
 	// Transform component
-	vec2 position = vec2{ 0.0f, 0.0f };
+	vec2 initial_position = vec2{ 0.0f, 0.0f };
+	float initial_angle = 0.0f;
+
+	vec2 final_position = vec2{ 0.0f, 0.0f };
+	float final_angle = 0.0f;
+
+	float secondsElapsed = 0.0f;
+
+
 	vec2 size = vec2{ 0.0f, 0.0f }; // NOTE(jesus): If equals 0, it takes the size of the texture
+	vec2 position = vec2{ 0.0f, 0.0f };
 	float angle = 0.0f;
 
 	// Render component
@@ -38,8 +47,10 @@ struct GameObject
 	};
 	State state = NON_EXISTING;
 
+	void createRead(const InputMemoryStream& packet);
 	void read(const InputMemoryStream& packet);
 	void write(OutputMemoryStream& packet);
+	void interpolate();
 
 private:
 
