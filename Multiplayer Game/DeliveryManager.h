@@ -2,12 +2,27 @@
 
 // TODO(you): Reliability on top of UDP lab session
 class DeliveryManager;
+class ReplicationCommand;
+class ReplicationManagerServer;
 
 class DeliveryDelegate
 {
 public:
-	virtual void OnDeliverySucces(DeliveryManager* deliveryManager) = 0;
+	virtual void OnDeliverySuccess(DeliveryManager* deliveryManager) = 0;
 	virtual void OnDeliveryFailure(DeliveryManager* deliveryManager) = 0;
+};
+
+class RepDeliveryManager: public DeliveryDelegate
+{
+public:
+	RepDeliveryManager(ReplicationManagerServer* repManager);
+
+	void OnDeliverySuccess(DeliveryManager* deliveryManager) {};
+	void OnDeliveryFailure(DeliveryManager* deliveryManager);
+
+private:
+	std::vector<ReplicationCommand> commands;
+	ReplicationManagerServer* repManagerServer = nullptr;
 };
 
 struct Delivery

@@ -52,7 +52,8 @@ void DeliveryManager::processAckdSequenceNumbers(const InputMemoryStream& packet
 		{
 			if ((*it)->sequenceNumber == sequenceNumber)
 			{
-				//(*it)->delegate->OnDeliverySucces(this);
+				//(*it)->delegate->OnDeliverySuccess(this);
+				//delete (*it)->delegate;
 				delete* it;
 				it = pendingDeliveries.erase(it);
 			}
@@ -69,10 +70,41 @@ void DeliveryManager::processTimedOutPackets()
 		if (Time.time - (*it)->dispatchTime >= PACKET_DELIVERY_TIMEOUT_SECONDS)
 		{
 			//(*it)->delegate->OnDeliveryFailure(this);
+			//delete (*it)->delegate;
 			delete* it;
 			it = pendingDeliveries.erase(it);
 		}
 		else
 			++it;
+	}
+}
+
+RepDeliveryManager::RepDeliveryManager(ReplicationManagerServer* repManager)
+{
+	repManagerServer = repManager;
+	for (std::unordered_map<uint32, ReplicationCommand>::iterator it_com = repManagerServer->repCommands.begin(); it_com != repManagerServer->repCommands.end(); ++it_com)
+	{
+		commands.push_back((*it_com).second);
+	}
+}
+
+void RepDeliveryManager::OnDeliveryFailure(DeliveryManager* deliveryManager)
+{
+	for (std::vector<ReplicationCommand>::iterator it_com = commands.begin(); it_com != commands.end(); ++it_com)
+	{
+		switch ((*it_com).action)
+		{
+		case ReplicationAction::Create:
+			repManagerServer->create((*it_com).networkId);
+			break;
+		case ReplicationAction::Update:
+			repManagerServer->update((*it_com).networkId);
+			break;
+		case ReplicationAction::Destroy:
+			repManagerServer->destroy((*it_com).networkId);
+			break;
+		default:
+			break;
+		}
 	}
 }

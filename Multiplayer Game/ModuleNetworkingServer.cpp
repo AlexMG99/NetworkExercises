@@ -253,7 +253,7 @@ void ModuleNetworkingServer::onUpdate()
 
 					if (delivery)
 					{
-						// TODO: On Succes and OnFailure delegate
+						//delivery->delegate = new RepDeliveryManager(&clientProxy.repManagerServer);
 					}
 					clientProxy.repManagerServer.write(packet);
 
