@@ -29,6 +29,9 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(GO, networkId);
 			// Deserialize fields
 			createObject(packet, GO);
+
+			if (networkId == App->modNetClient->GetNetworkId())
+				GO->networkInterpolationEnabled = false;
 		}
 		break;
 		case ReplicationAction::Update:
@@ -141,4 +144,5 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 
 		go->collider->isTrigger = isTrigger;
 	}
+
 }

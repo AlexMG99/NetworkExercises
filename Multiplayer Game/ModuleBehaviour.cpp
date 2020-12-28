@@ -63,6 +63,23 @@ Laser *ModuleBehaviour::addLaser(GameObject *parentGameObject)
 	return nullptr;
 }
 
+Meteorite* ModuleBehaviour::addMeteorite(GameObject* parentGameObject)
+{
+	for (Meteorite& behaviour : meteorite)
+	{
+		if (behaviour.gameObject == nullptr)
+		{
+			behaviour = {};
+			behaviour.gameObject = parentGameObject;
+			parentGameObject->behaviour = &behaviour;
+			return &behaviour;
+		}
+	}
+
+	ASSERT(false);
+	return nullptr;
+}
+
 void ModuleBehaviour::handleBehaviourLifeCycle(Behaviour *behaviour)
 {
 	GameObject *gameObject = behaviour->gameObject;

@@ -140,16 +140,27 @@ void GameObject::createRead(const InputMemoryStream& packet)
 void GameObject::read(const InputMemoryStream& packet)
 {
 	// Transform
-	packet >> final_position.x;
-	packet >> final_position.y;
-	packet >> size.x;
-	packet >> size.y;
-	packet >> final_angle;
+	if (networkInterpolationEnabled)
+	{
+		packet >> final_position.x;
+		packet >> final_position.y;
+		packet >> size.x;
+		packet >> size.y;
+		packet >> final_angle;
 
-	initial_position = position;
-	initial_angle = angle;
+		initial_position = position;
+		initial_angle = angle;
 
-	secondsElapsed = 0.0f;
+		secondsElapsed = 0.0f;
+	}
+	else
+	{
+		packet >> position.x;
+		packet >> position.y;
+		packet >> size.x;
+		packet >> size.y;
+		packet >> angle;
+	}
 
 }
 
@@ -175,4 +186,6 @@ void GameObject::interpolate()
 
 		secondsElapsed += Time.deltaTime;
 	}
+	LOG("Time: %f", t);
+	/*LOG("Posicion del otro player: %f, %f", position.x, position.y);*/
 }

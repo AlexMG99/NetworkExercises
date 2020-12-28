@@ -32,6 +32,7 @@ enum class BehaviourType : uint8
 	None,
 	Spaceship,
 	Laser,
+	Meteorite
 };
 
 
@@ -44,6 +45,23 @@ struct Laser : public Behaviour
 	void start() override;
 
 	void update() override;
+};
+
+struct Meteorite : public Behaviour
+{
+	float secondsSinceCreation = 0.0f;
+
+	BehaviourType type() const override { return BehaviourType::Laser; }
+
+	void start() override;
+
+	void update() override;
+
+	void onCollisionTriggered(Collider& c1, Collider& c2) override;
+
+private:
+	int maxHitPoints = 3;
+	int currentHitPoints = 0;
 };
 
 

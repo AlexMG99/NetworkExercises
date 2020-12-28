@@ -32,9 +32,6 @@ void Laser::update()
 }
 
 
-
-
-
 void Spaceship::start()
 {
 	gameObject->tag = (uint32)(Random.next() * UINT_MAX);
@@ -87,6 +84,25 @@ void Spaceship::onInput(const InputController &input)
 			laserBehaviour->isServer = isServer;
 
 			laser->tag = gameObject->tag;
+		}
+	}
+
+	if (input.start == ButtonState::Press)
+	{
+		if (isServer)
+		{
+			GameObject* meteor = NetworkInstantiate();
+
+			meteor->position = gameObject->position;
+			meteor->angle = gameObject->angle;
+			meteor->size = { 20, 60 };
+
+			meteor->sprite = App->modRender->addSprite(meteor);
+			meteor->sprite->order = 3;
+			meteor->sprite->texture = App->modResources->asteroid1;
+
+			Meteorite* meteroriteBehaviour = App->modBehaviour->addMeteorite(meteor);
+			meteroriteBehaviour->isServer = isServer;
 		}
 	}
 }
@@ -161,4 +177,60 @@ void Spaceship::write(OutputMemoryStream & packet)
 void Spaceship::read(const InputMemoryStream & packet)
 {
 	packet >> hitPoints;
+}
+
+void Meteorite::start()
+{
+	gameObject->networkInterpolationEnabled = false;
+}
+
+void Meteorite::update()
+{
+}
+
+void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
+{
+	if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
+	{
+		if (isServer)
+		{
+			NetworkDestroy(c2.gameObject); // Destroy the laser
+
+			if (currentHitPoints < maxHitPoints)
+			{
+				currentHitPoints++;
+				NetworkUpdate(gameObject);
+			}
+
+			float size = 30 + 50.0f * Random.next();
+			vec2 position = gameObject->position + 50.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+
+			if (currentHitPoints >= maxHitPoints)
+			{
+				// Centered big explosion
+				size = 250.0f + 100.0f * Random.next();
+				position = gameObject->position;
+
+				NetworkDestroy(gameObject);
+			}
+
+			/*GameObject* explosion = NetworkInstantiate();
+			explosion->position = position;
+			explosion->size = vec2{ size, size };
+			explosion->angle = 365.0f * Random.next();
+
+			explosion->sprite = App->modRender->addSprite(explosion);
+			explosion->sprite->texture = App->modResources->explosion1;
+			explosion->sprite->order = 100;
+
+			explosion->animation = App->modRender->addAnimation(explosion);
+			explosion->animation->clip = App->modResources->explosionClip;
+
+			NetworkDestroy(explosion, 2.0f);*/
+
+			// NOTE(jesus): Only played in the server right now...
+			// You need to somehow make this happen in clients
+			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
+		}
+	}
 }
