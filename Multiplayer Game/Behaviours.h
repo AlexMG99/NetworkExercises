@@ -93,6 +93,8 @@ struct Spaceship : public Behaviour
 
 	float secondsSinceHit = 0.0f;
 
+	int score = 0;
+
 	GameObject *lifebar = nullptr;
 
 	BehaviourType type() const override { return BehaviourType::Spaceship; }
@@ -114,4 +116,5 @@ struct Spaceship : public Behaviour
 	void SetAdvanceSpeed(float spd) { advanceSpeed = spd; }
 	void SetRotateSpeed(float spd) { rotateSpeed = spd; }
 	void SetMaxHealth(int hp) { MAX_HIT_POINTS = hp; hitPoints = MAX_HIT_POINTS; }
+	void AddScore(int scr) { score += scr; }
 };

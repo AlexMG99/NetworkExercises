@@ -36,6 +36,15 @@ void Spaceship::start()
 {
 	gameObject->tag = (uint32)(Random.next() * UINT_MAX);
 
+	if (App->modGameObject->spaceship01 == nullptr)
+	{
+		App->modGameObject->spaceship01 = gameObject;
+	}
+	else if (App->modGameObject->spaceship02 == nullptr)
+	{
+		App->modGameObject->spaceship02 = gameObject;
+	}
+
 	lifebar = Instantiate();
 	lifebar->sprite = App->modRender->addSprite(lifebar);
 	lifebar->sprite->pivot = vec2{ 0.0f, 0.5f };
@@ -130,6 +139,11 @@ void Spaceship::update()
 
 void Spaceship::destroy()
 {
+	if (App->modGameObject->spaceship01 != nullptr && App->modGameObject->spaceship01->networkId == gameObject->networkId)
+		App->modGameObject->spaceship01 = nullptr;
+	else if (App->modGameObject->spaceship02 != nullptr && App->modGameObject->spaceship02->networkId == gameObject->networkId)
+		App->modGameObject->spaceship02 = nullptr;
+
 	Destroy(lifebar);
 }
 
@@ -195,6 +209,8 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				hitPoints--;
 				NetworkUpdate(gameObject); 
 
+				score += 100;
+
 				Meteorite* meteoriteBehaviour = (Meteorite*)c2.gameObject->behaviour;
 
 				if (meteoriteBehaviour->GetCurrentLevel() < meteoriteBehaviour->GetMaxLevel())
@@ -238,6 +254,7 @@ void Spaceship::write(OutputMemoryStream & packet)
 	packet << advanceSpeed;
 	packet << rotateSpeed;
 	packet << MAX_HIT_POINTS;
+	packet << score;
 }
 
 void Spaceship::read(const InputMemoryStream & packet)
@@ -246,6 +263,7 @@ void Spaceship::read(const InputMemoryStream & packet)
 	packet >> advanceSpeed;
 	packet >> rotateSpeed;
 	packet >> MAX_HIT_POINTS;
+	packet >> score;
 }
 
 void Meteorite::create(vec2 spawnPos, float size, float ang, float speed)
@@ -357,15 +375,25 @@ void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
 			if (currentHitPoints >= maxHitPoints)
 			{
 				// Centered big explosion
-
 				CreateExplotion(position, size);
+
+				if (App->modGameObject->spaceship01 && App->modGameObject->spaceship01->tag == c2.gameObject->tag)
+				{
+					Spaceship* spaceshipBehaviour = (Spaceship*)(App->modGameObject->spaceship01->behaviour);
+					spaceshipBehaviour->AddScore(100);
+				}
+				else if (App->modGameObject->spaceship02 && App->modGameObject->spaceship02->tag == c2.gameObject->tag)
+				{
+					Spaceship* spaceshipBehaviour = (Spaceship*)(App->modGameObject->spaceship02->behaviour);
+					spaceshipBehaviour->AddScore(100);
+				}
 
 				if (currentLevel < maxLevel)
 				{
 					for (int i = 0; i < division; ++i)
 					{
-						float wtf = (float)(1.0f / division);
-						float angle = 20 + i * wtf * 360.0f;
+						float part = (float)(1.0f / division);
+						float angle = 20 + i * part * 360.0f;
 						create(gameObject->position, gameObject->size.x * 0.75f, angle, speed * 1.25);
 					}
 				}

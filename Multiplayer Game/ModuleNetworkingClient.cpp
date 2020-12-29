@@ -98,6 +98,24 @@ void ModuleNetworkingClient::onGui()
 			ImGui::InputFloat("Delivery interval (s)", &inputDeliveryIntervalSeconds, 0.01f, 0.1f, 4);
 		}
 	}
+
+	if (ImGui::Begin("Score Panel"))
+	{
+		if (state == ClientState::Connecting)
+		{
+			ImGui::Text("PRESS ENTER BUTTON TO START GAME");
+		}
+		else if (state == ClientState::Connected)
+		{
+			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+			if (playerGameObject != nullptr) {
+				Spaceship* spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
+				ImGui::Text("%s Score: %i", playerName.c_str(), spaceshipBehaviour->score);
+			}
+			
+		}
+		ImGui::End();
+	}
 }
 
 void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, const sockaddr_in &fromAddress)

@@ -85,6 +85,8 @@ public:
 
 
 	GameObject gameObjects[MAX_GAME_OBJECTS] = {};
+	GameObject* spaceship01 = nullptr;
+	GameObject* spaceship02 = nullptr;
 
 private:
 

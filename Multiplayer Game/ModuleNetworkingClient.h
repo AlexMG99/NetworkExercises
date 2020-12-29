@@ -62,6 +62,9 @@ private:
 	uint32 playerId = 0;
 	uint32 networkId = 0;
 
+	int playerScore = 0;
+	int totalScore = 0;
+
 
 	// Connecting stage
 
