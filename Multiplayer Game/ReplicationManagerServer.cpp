@@ -70,6 +70,13 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).first);
 			// Serialize position, angle, collider, behaviour,
 			GO->write(packet);
+
+			// Behaviour
+			bool hasBehaviour = (GO->behaviour != nullptr) ? true : false;
+			packet << hasBehaviour;
+
+			if (hasBehaviour)
+				GO->behaviour->write(packet);
 		}
 		break;
 		case ReplicationAction::Destroy:

@@ -142,7 +142,6 @@ void GameObject::createRead(const InputMemoryStream& packet)
 void GameObject::read(const InputMemoryStream& packet)
 {
 	packet >> hasTeleported;
-	LOG("%i", hasTeleported);
 	// Transform
 	if (networkInterpolationEnabled && !hasTeleported)
 	{
