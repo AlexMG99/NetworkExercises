@@ -13,6 +13,9 @@ static InputController KeyboardInput;
 
 static bool IsFocused = false;
 
+#define S_WIDTH 1920
+#define S_HEIGHT 1080
+
 
 // XInputGetState
 #define X_INPUT_GET_STATE(name) DWORD WINAPI name(DWORD dwUserIndex, XINPUT_STATE *pState)
@@ -197,8 +200,8 @@ bool ModulePlatform::init()
 		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
-		1024, //CW_USEDEFAULT,
-		768, //CW_USEDEFAULT,
+		S_WIDTH, //CW_USEDEFAULT,
+		S_HEIGHT, //CW_USEDEFAULT,
 		NULL,
 		NULL,
 		windowClass.hInstance,
