@@ -113,6 +113,8 @@ void Spaceship::onInput(const InputController &input)
 
 void Spaceship::update()
 {
+	secondsSinceHit += Time.deltaTime;
+
 	static const vec4 colorAlive = vec4{ 0.2f, 1.0f, 0.1f, 0.5f };
 	static const vec4 colorDead = vec4{ 1.0f, 0.2f, 0.1f, 0.5f };
 	const float lifeRatio = max(0.01f, (float)(hitPoints) / (MAX_HIT_POINTS));
@@ -128,6 +130,10 @@ void Spaceship::destroy()
 
 void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 {
+	const float neutralHitTime = 1.5f;
+	if (secondsSinceHit < neutralHitTime)
+		return;
+
 	if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
 	{
 		if (isServer)
@@ -169,6 +175,54 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 			// NOTE(jesus): Only played in the server right now...
 			// You need to somehow make this happen in clients
 			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
+
+			secondsSinceHit = 0.0f;
+		}
+	}
+	else if(c2.type == ColliderType::Meteorite && c2.gameObject->tag != gameObject->tag)
+	{
+		if (isServer)
+		{
+			NetworkDestroy(c2.gameObject); // Destroy the laser
+
+			if (hitPoints > 0)
+			{
+				hitPoints--;
+				NetworkUpdate(gameObject); 
+
+				Meteorite* meteoriteBehaviour = (Meteorite*)c2.gameObject->behaviour;
+
+				if (meteoriteBehaviour->GetCurrentLevel() < meteoriteBehaviour->GetMaxLevel())
+				{
+					for (int i = 0; i < meteoriteBehaviour->GetDivision(); ++i)
+					{
+						float wtf = (float)(1.0f / meteoriteBehaviour->GetDivision());
+						float angle = 20 + i * wtf * 360.0f;
+						meteoriteBehaviour->create(c2.gameObject->position, c2.gameObject->size.x * 0.75f, angle, meteoriteBehaviour->GetSpeed() * 1.25);
+					}
+				}
+				NetworkDestroy(c2.gameObject);
+			}
+
+			float size = gameObject->size.x + 50.0f * Random.next();
+			vec2 position = gameObject->position + 50.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+
+			if (hitPoints <= 0)
+			{
+				// Centered big explosion
+				size = 250.0f + 100.0f * Random.next();
+				position = gameObject->position;
+
+				NetworkDestroy(gameObject);
+			}
+
+			CreateExplotion(position, size);
+
+			// NOTE(jesus): Only played in the server right now...
+			// You need to somehow make this happen in clients
+			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
+
+			secondsSinceHit = 0.0f;
 		}
 	}
 }
@@ -293,19 +347,7 @@ void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
 			{
 				// Centered big explosion
 
-				GameObject* explosion = NetworkInstantiate();
-				explosion->position = position;
-				explosion->size = vec2{ size, size };
-				explosion->angle = 365.0f * Random.next();
-
-				explosion->sprite = App->modRender->addSprite(explosion);
-				explosion->sprite->texture = App->modResources->explosion1;
-				explosion->sprite->order = 100;
-
-				explosion->animation = App->modRender->addAnimation(explosion);
-				explosion->animation->clip = App->modResources->explosionClip;
-
-				NetworkDestroy(explosion, 2.0f);
+				CreateExplotion(position, size);
 
 				if (currentLevel < maxLevel)
 				{
@@ -338,4 +380,21 @@ void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
 			App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 		}
 	}
+}
+
+void Behaviour::CreateExplotion(const vec2& position, float size)
+{
+	GameObject* explosion = NetworkInstantiate();
+	explosion->position = position;
+	explosion->size = vec2{ size, size };
+	explosion->angle = 365.0f * Random.next();
+
+	explosion->sprite = App->modRender->addSprite(explosion);
+	explosion->sprite->texture = App->modResources->explosion1;
+	explosion->sprite->order = 100;
+
+	explosion->animation = App->modRender->addAnimation(explosion);
+	explosion->animation->clip = App->modResources->explosionClip;
+
+	NetworkDestroy(explosion, 2.0f);
 }

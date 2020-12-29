@@ -13,6 +13,8 @@ struct Behaviour
 
 	virtual void start() { }
 
+	void CreateExplotion(const vec2& position, float size);
+
 	virtual void onInput(const InputController &input) { }
 
 	virtual void update() { }
@@ -65,6 +67,11 @@ struct Meteorite : public Behaviour
 
 	void onCollisionTriggered(Collider& c1, Collider& c2) override;
 
+	int GetCurrentLevel() { return currentLevel; }
+	int GetMaxLevel() { return maxLevel; }
+	float GetSpeed() { return speed; }
+	int GetDivision() { return division; }
+
 private:
 	int maxHitPoints = 1;
 	int currentHitPoints = 0;
@@ -80,6 +87,8 @@ struct Spaceship : public Behaviour
 {
 	static const uint8 MAX_HIT_POINTS = 5;
 	uint8 hitPoints = MAX_HIT_POINTS;
+
+	float secondsSinceHit = 0.0f;
 
 	GameObject *lifebar = nullptr;
 
