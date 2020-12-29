@@ -80,7 +80,6 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		}
 		break;
 		case ReplicationAction::Destroy:
-			//LOG("JEJE DESTRUYO!!!!!");
 			break;
 		}
 

@@ -16,6 +16,8 @@ public:
 
 	uint32 GetNetworkId() { return networkId; }
 
+	sockaddr_in GetServerAdress() { return serverAddress; }
+
 
 private:
 

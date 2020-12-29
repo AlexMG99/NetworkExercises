@@ -349,6 +349,10 @@ bool ModulePlatform::preUpdate()
 					{
 						Win32ProcessKeyboardButton(&KeyboardInput.rightShoulder, IsDown);
 					}
+					else if (VKCode == 'R')
+					{
+						Win32ProcessKeyboardButton(&KeyboardInput.R_key, IsDown);
+					}
 					else if (VKCode == VK_UP)
 					{
 						Win32ProcessKeyboardButton(&KeyboardInput.actionUp, IsDown);

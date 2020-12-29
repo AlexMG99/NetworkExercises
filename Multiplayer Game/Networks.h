@@ -146,6 +146,7 @@ struct InputController
 			ButtonState rightShoulder;
 			ButtonState back;
 			ButtonState start;
+			ButtonState R_key;
 		};
 	};
 };

@@ -70,6 +70,8 @@ private:
 
     void destroyClientProxy(ClientProxy *clientProxy);
 
+	int currentHealth = 3;
+	int MAX_HEALTH = 3;
 
 
 public:

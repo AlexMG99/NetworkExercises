@@ -5,7 +5,8 @@ enum class ClientMessage : uint8
 	Hello,
 	Input,
 	Ping,   // NOTE(jesus): Use this message type in the virtual connection lab session
-	Replication
+	Replication,
+	LostHP
 };
 
 enum class ServerMessage : uint8
@@ -14,5 +15,6 @@ enum class ServerMessage : uint8
 	Unwelcome,
 	Input,
 	Ping,   // NOTE(jesus): Use this message type in the virtual connection lab session
-	Replication
+	Replication,
+	LostHP
 };
