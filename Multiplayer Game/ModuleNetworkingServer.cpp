@@ -375,6 +375,8 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	gameObject->sprite->order = 5;
 	if (spaceshipType == 0) {
 		gameObject->sprite->texture = App->modResources->spacecraft1;
+		gameObject->animation = App->modRender->addAnimation(gameObject);
+		gameObject->animation->clip = App->modResources->spaceshipClip;
 	}
 	else if (spaceshipType == 1) {
 		gameObject->sprite->texture = App->modResources->spacecraft2;

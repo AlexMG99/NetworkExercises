@@ -86,9 +86,11 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 
 			go->sprite->order = 5;
 
-			if (strcmp(fName.c_str(), "spacecraft1.png") == 0)
+			if (strcmp(fName.c_str(), "spaceship_01.png") == 0)
 			{
 				go->sprite->texture = App->modResources->spacecraft1;
+				go->animation = App->modRender->addAnimation(go);
+				go->animation->clip = App->modResources->spaceshipClip;
 			}
 			else if (strcmp(fName.c_str(), "spacecraft2.png") == 0)
 			{

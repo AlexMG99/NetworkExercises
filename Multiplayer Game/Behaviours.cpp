@@ -190,6 +190,16 @@ void Meteorite::start()
 
 void Meteorite::update()
 {
+	const float pixelsPerSecond = 1000.0f;
+	gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
+
+	if (isServer)
+	{
+		const float lifetimeSeconds = 2.0f;
+		if (secondsSinceCreation >= lifetimeSeconds) {
+			NetworkDestroy(gameObject);
+		}
+	}
 }
 
 void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)

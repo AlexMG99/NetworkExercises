@@ -251,15 +251,15 @@ void ModuleNetworkingClient::onUpdate()
 		// TODO(you): Latency management lab session
 
 		// Update camera for player
-		GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-		if (playerGameObject != nullptr)
-		{
-			App->modRender->cameraPosition = playerGameObject->position;
-		}
-		else
-		{
-			// This means that the player has been destroyed (e.g. killed)
-		}
+		//GameObject *playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
+		//if (playerGameObject != nullptr)
+		//{
+		//	App->modRender->cameraPosition = playerGameObject->position;
+		//}
+		//else
+		//{
+		//	// This means that the player has been destroyed (e.g. killed)
+		//}
 
 		// Interpolation of other objects
 		uint16 objCount = 0;
