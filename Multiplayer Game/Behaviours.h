@@ -53,15 +53,26 @@ struct Meteorite : public Behaviour
 
 	BehaviourType type() const override { return BehaviourType::Meteorite; }
 
+	void create(vec2 spawnPos, float size, float ang, float speed);
+
 	void start() override;
 
 	void update() override;
 
+	void write(OutputMemoryStream& packet) override;
+
+	void read(const InputMemoryStream& packet) override;
+
 	void onCollisionTriggered(Collider& c1, Collider& c2) override;
 
 private:
-	int maxHitPoints = 3;
+	int maxHitPoints = 1;
 	int currentHitPoints = 0;
+
+	int division = 3;
+	int currentLevel = 0;
+	int maxLevel = 3;
+	float speed = 100.0f;
 };
 
 

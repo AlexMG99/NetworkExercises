@@ -84,6 +84,8 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 		{
 			//go->behaviour->isServer = false;
 
+			go->behaviour->read(packet);
+
 			go->sprite->order = 5;
 
 			if (strcmp(fName.c_str(), "spaceship_01.png") == 0)
@@ -113,6 +115,8 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 		case BehaviourType::Meteorite:
 		{
 			//laserBehaviour->isServer = false;
+
+			go->behaviour->read(packet);
 
 			go->sprite->texture = App->modResources->asteroid1;
 			go->sprite->order = 5;

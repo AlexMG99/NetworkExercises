@@ -46,7 +46,10 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 			packet << hasBehaviour;
 
 			if (hasBehaviour)
+			{
 				packet << GO->behaviour->type();
+				GO->behaviour->write(packet);
+			}
 
 			// Collider
 			bool hasCollider = false;

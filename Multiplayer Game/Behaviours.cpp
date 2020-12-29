@@ -105,8 +105,8 @@ void Spaceship::onInput(const InputController &input)
 			meteroriteBehaviour->isServer = isServer;
 
 			// Create collider
-			gameObject->collider = App->modCollision->addCollider(ColliderType::Meteorite, gameObject);
-			gameObject->collider->isTrigger = true;
+			meteor->collider = App->modCollision->addCollider(ColliderType::Meteorite, meteor);
+			meteor->collider->isTrigger = true;
 		}
 	}
 }
@@ -140,7 +140,7 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				NetworkUpdate(gameObject);
 			}
 
-			float size = 30 + 50.0f * Random.next();
+			float size = gameObject->size.x + 50.0f * Random.next();
 			vec2 position = gameObject->position + 50.0f * vec2{Random.next() - 0.5f, Random.next() - 0.5f};
 
 			if (hitPoints <= 0)
@@ -183,6 +183,30 @@ void Spaceship::read(const InputMemoryStream & packet)
 	packet >> hitPoints;
 }
 
+void Meteorite::create(vec2 spawnPos, float size, float ang, float speed)
+{
+	GameObject* meteor = NetworkInstantiate();
+
+	meteor->position = spawnPos;
+	meteor->angle = ang;
+	meteor->size = { size, size };
+
+	meteor->sprite = App->modRender->addSprite(meteor);
+	meteor->sprite->order = 5;
+	meteor->sprite->texture = App->modResources->asteroid1;
+
+	Meteorite* meteroriteBehaviour = App->modBehaviour->addMeteorite(meteor);
+	meteroriteBehaviour->isServer = isServer;
+	meteroriteBehaviour->speed = speed;
+	meteroriteBehaviour->currentLevel = currentLevel + 1;
+
+	// Create collider
+	meteor->collider = App->modCollision->addCollider(ColliderType::Meteorite, meteor);
+	meteor->collider->isTrigger = true;
+
+
+}
+
 void Meteorite::start()
 {
 	gameObject->networkInterpolationEnabled = false;
@@ -190,11 +214,15 @@ void Meteorite::start()
 
 void Meteorite::update()
 {
-	const float pixelsPerSecond = 1000.0f;
-	gameObject->position += vec2FromDegrees(gameObject->angle) * pixelsPerSecond * Time.deltaTime;
+	gameObject->position += vec2FromDegrees(gameObject->angle) * speed * Time.deltaTime;
 
 	if (isServer)
 	{
+		const float neutralTimeSeconds = 0.1f;
+		if (secondsSinceCreation > neutralTimeSeconds&& gameObject->collider == nullptr) {
+			gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
+		}
+
 		const float lifetimeSeconds = 2.0f;
 		if (secondsSinceCreation >= lifetimeSeconds) {
 			NetworkDestroy(gameObject);
@@ -202,9 +230,21 @@ void Meteorite::update()
 	}
 }
 
+void Meteorite::write(OutputMemoryStream& packet)
+{
+	packet << speed;
+	packet << currentLevel;
+}
+
+void Meteorite::read(const InputMemoryStream& packet)
+{
+	packet >> speed;
+	packet >> currentLevel;
+}
+
 void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
 {
-	if (c2.type == ColliderType::Laser && c2.gameObject->tag != gameObject->tag)
+	if (c2.type == ColliderType::Laser)
 	{
 		if (isServer)
 		{
@@ -222,9 +262,30 @@ void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
 			if (currentHitPoints >= maxHitPoints)
 			{
 				// Centered big explosion
-				size = 250.0f + 100.0f * Random.next();
-				position = gameObject->position;
 
+				GameObject* explosion = NetworkInstantiate();
+				explosion->position = position;
+				explosion->size = vec2{ size, size };
+				explosion->angle = 365.0f * Random.next();
+
+				explosion->sprite = App->modRender->addSprite(explosion);
+				explosion->sprite->texture = App->modResources->explosion1;
+				explosion->sprite->order = 100;
+
+				explosion->animation = App->modRender->addAnimation(explosion);
+				explosion->animation->clip = App->modResources->explosionClip;
+
+				NetworkDestroy(explosion, 2.0f);
+
+				if (currentLevel < maxLevel)
+				{
+					for (int i = 0; i < division; ++i)
+					{
+						float wtf = (float)(1.0f / division);
+						float angle = 20 + i * wtf * 360.0f;
+						create(gameObject->position, gameObject->size.x * 0.75f, angle, speed * 1.25);
+					}
+				}
 				NetworkDestroy(gameObject);
 			}
 

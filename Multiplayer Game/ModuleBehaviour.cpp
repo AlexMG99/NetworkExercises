@@ -13,6 +13,11 @@ bool ModuleBehaviour::update()
 		handleBehaviourLifeCycle(&behaviour);
 	}
 
+	for (Meteorite& behaviour : meteorite)
+	{
+		handleBehaviourLifeCycle(&behaviour);
+	}
+
 	return true;
 }
 
