@@ -85,8 +85,11 @@ private:
 
 struct Spaceship : public Behaviour
 {
-	static const uint8 MAX_HIT_POINTS = 5;
+	uint8 MAX_HIT_POINTS = 5;
 	uint8 hitPoints = MAX_HIT_POINTS;
+
+	float advanceSpeed = 200.0f;
+	float rotateSpeed = 180.0f;
 
 	float secondsSinceHit = 0.0f;
 
@@ -107,4 +110,8 @@ struct Spaceship : public Behaviour
 	void write(OutputMemoryStream &packet) override;
 
 	void read(const InputMemoryStream &packet) override;
+
+	void SetAdvanceSpeed(float spd) { advanceSpeed = spd; }
+	void SetRotateSpeed(float spd) { rotateSpeed = spd; }
+	void SetMaxHealth(int hp) { MAX_HIT_POINTS = hp; hitPoints = MAX_HIT_POINTS; }
 };

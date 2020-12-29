@@ -16,9 +16,10 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 {
 	while ((int)packet.RemainingByteCount() > 0)
 	{
-		uint32 networkId;
+		uint32 networkId = 0;
 		packet >> networkId;
-		ReplicationAction action;
+
+		ReplicationAction action = ReplicationAction::None;
 		packet >> action;
 
 		switch (action)
@@ -26,12 +27,21 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 		case ReplicationAction::Create:
 		{
 			GameObject* GO = App->modGameObject->Instantiate();
-			App->modLinkingContext->registerNetworkGameObjectWithNetworkId(GO, networkId);
-			// Deserialize fields
-			createObject(packet, GO);
 
-			if (networkId == App->modNetClient->GetNetworkId())
-				GO->networkInterpolationEnabled = false;
+			if (App->modLinkingContext->getNetworkGameObject(networkId) != nullptr)
+			{
+				createObject(packet, GO);
+				App->modGameObject->Destroy(GO);
+			}
+			else
+			{
+				App->modLinkingContext->registerNetworkGameObjectWithNetworkId(GO, networkId);
+				createObject(packet, GO);
+
+				if (networkId == App->modNetClient->GetNetworkId())
+					GO->networkInterpolationEnabled = false;
+			}
+			
 		}
 		break;
 		case ReplicationAction::Update:
@@ -100,11 +110,13 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 			{
 				go->sprite->texture = App->modResources->spacecraft1;
 				go->animation = App->modRender->addAnimation(go);
-				go->animation->clip = App->modResources->spaceshipClip;
+				go->animation->clip = App->modResources->spaceship01Clip;
 			}
-			else if (strcmp(fName.c_str(), "spacecraft2.png") == 0)
+			else if (strcmp(fName.c_str(), "spaceship_02.png") == 0)
 			{
 				go->sprite->texture = App->modResources->spacecraft2;
+				go->animation = App->modRender->addAnimation(go);
+				go->animation->clip = App->modResources->spaceship02Clip;
 			}
 			else if (strcmp(fName.c_str(), "spacecraft3.png") == 0)
 			{

@@ -373,26 +373,37 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	// Create sprite
 	gameObject->sprite = App->modRender->addSprite(gameObject);
 	gameObject->sprite->order = 5;
+
+	// Create behaviour
+	Spaceship* spaceshipBehaviour = App->modBehaviour->addSpaceship(gameObject);
+
 	if (spaceshipType == 0) {
 		gameObject->sprite->texture = App->modResources->spacecraft1;
 		gameObject->animation = App->modRender->addAnimation(gameObject);
-		gameObject->animation->clip = App->modResources->spaceshipClip;
+		gameObject->animation->clip = App->modResources->spaceship01Clip;
+
+		// Set Stats Speed
+		spaceshipBehaviour->SetAdvanceSpeed(300.0f);
+		spaceshipBehaviour->SetRotateSpeed(360.0f);
+		spaceshipBehaviour->SetMaxHealth(4);
 	}
 	else if (spaceshipType == 1) {
 		gameObject->sprite->texture = App->modResources->spacecraft2;
+		gameObject->animation = App->modRender->addAnimation(gameObject);
+		gameObject->animation->clip = App->modResources->spaceship02Clip;
+
+		// Set Stats Tank
+		spaceshipBehaviour->SetAdvanceSpeed(150.0f);
+		spaceshipBehaviour->SetRotateSpeed(200.0f);
+		spaceshipBehaviour->SetMaxHealth(7);
 	}
-	else {
-		gameObject->sprite->texture = App->modResources->spacecraft3;
-	}
+
+	gameObject->behaviour = spaceshipBehaviour;
+	gameObject->behaviour->isServer = true;
 
 	// Create collider
 	gameObject->collider = App->modCollision->addCollider(ColliderType::Player, gameObject);
 	gameObject->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
-
-	// Create behaviour
-	Spaceship * spaceshipBehaviour = App->modBehaviour->addSpaceship(gameObject);
-	gameObject->behaviour = spaceshipBehaviour;
-	gameObject->behaviour->isServer = true;
 
 	return gameObject;
 }

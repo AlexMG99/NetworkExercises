@@ -33,7 +33,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		{
 		case ReplicationAction::Create:
 		{
-			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).first);
+			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).second.networkId);
 			// Serialize GO
 			GO->write(packet);
 
@@ -67,7 +67,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		break;
 		case ReplicationAction::Update:
 		{
-			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).first);
+			GameObject* GO = App->modLinkingContext->getNetworkGameObject((*it).second.networkId);
 			// Serialize position, angle, collider, behaviour,
 			GO->write(packet);
 
@@ -80,7 +80,7 @@ void ReplicationManagerServer::write(OutputMemoryStream& packet)
 		}
 		break;
 		case ReplicationAction::Destroy:
-			LOG("JEJE DESTRUYO!!!!!");
+			//LOG("JEJE DESTRUYO!!!!!");
 			break;
 		}
 

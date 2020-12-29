@@ -20,7 +20,8 @@ public:
 	Texture	*start = nullptr;
 
 	AnimationClip *explosionClip = nullptr;
-	AnimationClip* spaceshipClip = nullptr;
+	AnimationClip* spaceship01Clip = nullptr;
+	AnimationClip* spaceship02Clip = nullptr;
 
 	AudioClip *audioClipLaser = nullptr;
 	AudioClip *audioClipExplosion = nullptr;

@@ -5,7 +5,7 @@
 
 void Laser::start()
 {
-	gameObject->networkInterpolationEnabled = false;
+	gameObject->networkInterpolationEnabled = true;
 
 	App->modSound->playAudioClip(App->modResources->audioClipLaser);
 }
@@ -46,7 +46,6 @@ void Spaceship::onInput(const InputController &input)
 {
 	if (input.horizontalAxis != 0.0f)
 	{
-		const float rotateSpeed = 180.0f;
 		gameObject->angle += input.horizontalAxis * rotateSpeed * Time.deltaTime;
 
 		if (isServer)
@@ -57,7 +56,6 @@ void Spaceship::onInput(const InputController &input)
 
 	if (input.actionDown == ButtonState::Pressed)
 	{
-		const float advanceSpeed = 200.0f;
 		gameObject->position += vec2FromDegrees(gameObject->angle) * advanceSpeed * Time.deltaTime;
 
 		if (isServer)
@@ -237,11 +235,17 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 void Spaceship::write(OutputMemoryStream & packet)
 {
 	packet << hitPoints;
+	packet << advanceSpeed;
+	packet << rotateSpeed;
+	packet << MAX_HIT_POINTS;
 }
 
 void Spaceship::read(const InputMemoryStream & packet)
 {
 	packet >> hitPoints;
+	packet >> advanceSpeed;
+	packet >> rotateSpeed;
+	packet >> MAX_HIT_POINTS;
 }
 
 void Meteorite::create(vec2 spawnPos, float size, float ang, float speed)

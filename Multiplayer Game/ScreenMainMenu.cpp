@@ -48,7 +48,7 @@ void ScreenMainMenu::gui()
 	static char playerNameStr[64] = "";
 	ImGui::InputText("Player name", playerNameStr, sizeof(playerNameStr));
 
-	const char* spaceshipTypes[] = { "Type 0", "Type 1", "Type 2" };
+	const char* spaceshipTypes[] = { "Speed Ship", "Tank Ship"};
 	static const char* spaceshipTypeStr = spaceshipTypes[0];
 	static uint8 spaceshipType = 0;
 	if (ImGui::BeginCombo("Spaceship##combo", spaceshipTypeStr)) // The second parameter is the label previewed before opening the combo.
