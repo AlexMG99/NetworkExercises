@@ -126,6 +126,8 @@ void Destroy(GameObject * gameObject, float delaySeconds)
 
 void GameObject::createRead(const InputMemoryStream& packet)
 {
+	packet >> hasTeleported;
+
 	// Transform
 	packet >> position.x;
 	packet >> position.y;
@@ -139,8 +141,10 @@ void GameObject::createRead(const InputMemoryStream& packet)
 
 void GameObject::read(const InputMemoryStream& packet)
 {
+	packet >> hasTeleported;
+	LOG("%i", hasTeleported);
 	// Transform
-	if (networkInterpolationEnabled)
+	if (networkInterpolationEnabled && !hasTeleported)
 	{
 		packet >> final_position.x;
 		packet >> final_position.y;
@@ -166,13 +170,14 @@ void GameObject::read(const InputMemoryStream& packet)
 
 void GameObject::write(OutputMemoryStream& packet)
 {
+	packet << hasTeleported;
+
 	// Transform
 	packet << position.x;
 	packet << position.y;
 	packet << size.x;
 	packet << size.y;
 	packet << angle;
-
 }
 
 void GameObject::interpolate()
@@ -186,6 +191,6 @@ void GameObject::interpolate()
 
 		secondsElapsed += Time.deltaTime;
 	}
-	LOG("Time: %f", t);
+	//LOG("Time: %f", t);
 	/*LOG("Posicion del otro player: %f, %f", position.x, position.y);*/
 }

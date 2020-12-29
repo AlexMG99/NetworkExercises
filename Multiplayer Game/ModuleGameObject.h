@@ -52,6 +52,8 @@ struct GameObject
 	void write(OutputMemoryStream& packet);
 	void interpolate();
 
+	bool hasTeleported = false;
+
 private:
 
 	void * operator new(size_t size) = delete;

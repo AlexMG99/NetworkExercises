@@ -227,6 +227,36 @@ void Meteorite::update()
 		if (secondsSinceCreation >= lifetimeSeconds) {
 			NetworkDestroy(gameObject);
 		}
+
+		float mid_w = Window.width * 0.5f;
+		float mid_h = Window.height * 0.5f;
+
+		if (gameObject->position.x < -mid_w)
+		{
+			gameObject->position.x = gameObject->final_position.x = mid_w - 20;
+			gameObject->hasTeleported = true;
+			NetworkUpdate(gameObject);
+		}
+		else if (gameObject->position.x > mid_w)
+		{
+			gameObject->position.x = gameObject->final_position.x = -mid_w + 20;
+			gameObject->hasTeleported = true;
+			NetworkUpdate(gameObject);
+		}
+		else if (gameObject->position.y > mid_h)
+		{
+			gameObject->position.y = gameObject->final_position.y = -mid_h + 20;
+			gameObject->hasTeleported = true;
+			NetworkUpdate(gameObject);
+		}
+		else if (gameObject->position.y < -mid_h)
+		{
+			gameObject->position.y = gameObject->final_position.y = mid_h - 20;
+			gameObject->hasTeleported = true;
+			NetworkUpdate(gameObject);
+		}
+
+
 	}
 }
 
@@ -256,7 +286,7 @@ void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
 				NetworkUpdate(gameObject);
 			}
 
-			float size = 30 + 50.0f * Random.next();
+			float size = 100 + 50.0f * Random.next();
 			vec2 position = gameObject->position + 50.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
 
 			if (currentHitPoints >= maxHitPoints)
