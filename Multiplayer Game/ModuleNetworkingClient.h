@@ -40,7 +40,6 @@ private:
 	void onDisconnect() override;
 
 
-
 	//////////////////////////////////////////////////////////////////////
 	// Client state
 	//////////////////////////////////////////////////////////////////////
@@ -49,7 +48,8 @@ private:
 	{
 		Stopped,
 		Connecting,
-		Connected
+		Connected,
+		Game
 	};
 
 	ClientState state = ClientState::Stopped;
@@ -67,6 +67,8 @@ private:
 	int playerScore = 0;
 	int totalScore = 0;
 
+	int currentHealth = 0;
+	int MAX_HEALTH = 0;
 
 	// Connecting stage
 

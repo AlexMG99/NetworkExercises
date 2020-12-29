@@ -2,8 +2,6 @@
 #include "Behaviours.h"
 #include "ModuleNetworking.h"
 
-
-
 void Laser::start()
 {
 	gameObject->networkInterpolationEnabled = true;
@@ -99,29 +97,7 @@ void Spaceship::onInput(const InputController &input)
 	{
 		if (isServer)
 		{
-			GameObject* meteor = NetworkInstantiate();
-
-			meteor->position = { 0.0f, 0.0f };
-			meteor->angle = 0.0f;
-			meteor->size = { 200, 200 };
-
-			meteor->sprite = App->modRender->addSprite(meteor);
-			meteor->sprite->order = 5;
-			meteor->sprite->texture = App->modResources->asteroid1;
-
-			Meteorite* meteroriteBehaviour = App->modBehaviour->addMeteorite(meteor);
-			meteroriteBehaviour->isServer = isServer;
-
-			// Create collider
-			meteor->collider = App->modCollision->addCollider(ColliderType::Meteorite, meteor);
-			meteor->collider->isTrigger = true;
-
-			GameObject* startMsg = NetworkInstantiate();
-			startMsg->sprite = App->modRender->addSprite(startMsg);
-			startMsg->sprite->texture = App->modResources->start;
-			startMsg->sprite->order = 100;
-
-			NetworkDestroy(startMsg, 1.0f);
+			
 		}
 	}
 }

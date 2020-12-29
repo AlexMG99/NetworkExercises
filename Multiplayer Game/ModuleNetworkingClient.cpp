@@ -63,7 +63,7 @@ void ModuleNetworkingClient::onGui()
 		{
 			ImGui::Text("Connecting to server...");
 		}
-		else if (state == ClientState::Connected)
+		else if (state == ClientState::Connected || state == ClientState::Game)
 		{
 			ImGui::Text("Connected to server");
 
@@ -101,11 +101,18 @@ void ModuleNetworkingClient::onGui()
 
 	if (ImGui::Begin("Score Panel"))
 	{
-		if (state == ClientState::Connecting)
+		if (state == ClientState::Connected)
 		{
-			ImGui::Text("PRESS ENTER BUTTON TO START GAME");
+			if (ImGui::Button("Start"))
+			{
+				OutputMemoryStream packet;
+				packet << PROTOCOL_ID;
+				packet << ClientMessage::StartGame;
+
+				sendPacket(packet, serverAddress);
+			}
 		}
-		else if (state == ClientState::Connected)
+		else if (state == ClientState::Game)
 		{
 			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 			if (playerGameObject != nullptr) {
@@ -145,7 +152,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			disconnect();
 		}
 	}
-	else if (state == ClientState::Connected)
+	else if (state == ClientState::Connected ||state == ClientState::Game)
 	{
 		// TODO(you): World state replication lab session
 		if (message == ServerMessage::Replication)
@@ -158,7 +165,8 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 				GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 				if (playerGameObject == nullptr)
 					return;
-
+				
+				// Client Side prediction
 				InputController prevController;
 				prevController = inputControllerFromInputPacketData(inputData[inputDataFront % ArrayCount(inputData)], prevController);
 
@@ -167,7 +175,24 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 					prevController = inputControllerFromInputPacketData(inputData[i % ArrayCount(inputData)], prevController);
 					playerGameObject->behaviour->onInput(prevController);
 				}
+
 			}
+		}
+		else if (message == ServerMessage::LostHP)
+		{
+			packet >> currentHealth;
+			
+			if (currentHealth <= 0)
+			{
+				// Disconnect
+			}
+		}
+		else if (message == ServerMessage::StartGame)
+		{
+			packet >> MAX_HEALTH;
+			currentHealth = MAX_HEALTH;
+
+			state = ClientState::Game;
 		}
 		
 	}

@@ -6,6 +6,7 @@ enum class ClientMessage : uint8
 	Input,
 	Ping,   // NOTE(jesus): Use this message type in the virtual connection lab session
 	Replication,
+	StartGame,
 	LostHP
 };
 
@@ -16,5 +17,6 @@ enum class ServerMessage : uint8
 	Input,
 	Ping,   // NOTE(jesus): Use this message type in the virtual connection lab session
 	Replication,
+	StartGame,
 	LostHP
 };

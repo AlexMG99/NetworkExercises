@@ -94,6 +94,7 @@ struct Spaceship : public Behaviour
 	float secondsSinceHit = 0.0f;
 
 	int score = 0;
+	bool isDead = 0;
 
 	GameObject *lifebar = nullptr;
 

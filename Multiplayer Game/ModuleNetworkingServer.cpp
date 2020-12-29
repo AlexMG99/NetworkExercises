@@ -198,6 +198,28 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				proxy->deliveryManager.processAckdSequenceNumbers(packet);
 			}
 		}
+		else if (message == ClientMessage::StartGame)
+		{
+			OutputMemoryStream packet;
+			packet << PROTOCOL_ID;
+			packet << ServerMessage::StartGame;
+			packet << MAX_HEALTH;
+
+			StartGame();
+
+			sendPacket(packet, fromAddress);
+		}
+		else if (message == ClientMessage::LostHP)
+		{
+			currentHealth--;
+
+			OutputMemoryStream hpLost;
+			hpLost << PROTOCOL_ID;
+			hpLost << ServerMessage::LostHP;
+			hpLost << currentHealth;
+			sendPacket(hpLost, fromAddress);
+		}
+
 	}
 }
 
@@ -406,6 +428,33 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 	gameObject->collider->isTrigger = true; // NOTE(jesus): This object will receive onCollisionTriggered events
 
 	return gameObject;
+}
+
+void ModuleNetworkingServer::StartGame()
+{
+	GameObject* meteor = NetworkInstantiate();
+
+	meteor->position = { 0.0f, 0.0f };
+	meteor->angle = 0.0f;
+	meteor->size = { 200, 200 };
+
+	meteor->sprite = App->modRender->addSprite(meteor);
+	meteor->sprite->order = 5;
+	meteor->sprite->texture = App->modResources->asteroid1;
+
+	Meteorite* meteroriteBehaviour = App->modBehaviour->addMeteorite(meteor);
+	meteroriteBehaviour->isServer = isServer();
+
+	// Create collider
+	meteor->collider = App->modCollision->addCollider(ColliderType::Meteorite, meteor);
+	meteor->collider->isTrigger = true;
+
+	GameObject* startMsg = NetworkInstantiate();
+	startMsg->sprite = App->modRender->addSprite(startMsg);
+	startMsg->sprite->texture = App->modResources->start;
+	startMsg->sprite->order = 100;
+
+	NetworkDestroy(startMsg, 1.0f);
 }
 
 

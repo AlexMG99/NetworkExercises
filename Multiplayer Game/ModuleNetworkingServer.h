@@ -50,6 +50,9 @@ private:
 		std::string name;
 		GameObject *gameObject = nullptr;
 
+		int MAX_HEALTH = 0;
+		int currentHealth = 0;
+
 		// TODO(you): UDP virtual connection lab session
 		float timeSinceLastPacketRecieved = 0.0f;
 		// TODO(you): World state replication lab session
@@ -82,7 +85,7 @@ public:
 
 	GameObject * spawnPlayer(uint8 spaceshipType, vec2 initialPosition, float initialAngle);
 
-
+	void StartGame();
 
 private:
 
