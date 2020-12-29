@@ -149,6 +149,11 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 
 		App->modSound->playAudioClip(App->modResources->audioClipExplosion);
 	}
+	else if (strcmp(fName.c_str(), "start.png") == 0)
+	{
+		go->sprite->texture = App->modResources->start;
+		go->sprite->order = 100;
+	}
 	
 	// Collider
 	bool hasCollider;

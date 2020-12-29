@@ -107,6 +107,13 @@ void Spaceship::onInput(const InputController &input)
 			// Create collider
 			meteor->collider = App->modCollision->addCollider(ColliderType::Meteorite, meteor);
 			meteor->collider->isTrigger = true;
+
+			GameObject* startMsg = NetworkInstantiate();
+			startMsg->sprite = App->modRender->addSprite(startMsg);
+			startMsg->sprite->texture = App->modResources->start;
+			startMsg->sprite->order = 100;
+
+			NetworkDestroy(startMsg, 1.0f);
 		}
 	}
 }

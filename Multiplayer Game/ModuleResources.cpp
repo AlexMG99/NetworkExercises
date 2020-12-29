@@ -22,6 +22,7 @@ bool ModuleResources::init()
 	spacecraft1 = App->modTextures->loadTexture("spaceship_01.png");
 	spacecraft2 = App->modTextures->loadTexture("spacecraft2.png");
 	spacecraft3 = App->modTextures->loadTexture("spacecraft3.png");
+	start = App->modTextures->loadTexture("start.png");
 	loadingFinished = true;
 	completionRatio = 1.0f;
 #else
@@ -33,6 +34,7 @@ bool ModuleResources::init()
 	loadTextureAsync("spacecraft3.png",      &spacecraft3);
 	loadTextureAsync("laser_1.png",            &laser);
 	loadTextureAsync("explosion1.png",       &explosion1);
+	loadTextureAsync("start.png",				&start);
 #endif
 
 	audioClipLaser = App->modSound->loadAudioClip("laser.wav");
