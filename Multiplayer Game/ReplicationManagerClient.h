@@ -9,5 +9,5 @@ public:
 
 	void createObject(const InputMemoryStream& packet, GameObject* go);
 
-	//More shit..
+	//More shit...
 };

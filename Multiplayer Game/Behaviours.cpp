@@ -93,16 +93,20 @@ void Spaceship::onInput(const InputController &input)
 		{
 			GameObject* meteor = NetworkInstantiate();
 
-			meteor->position = gameObject->position;
-			meteor->angle = gameObject->angle;
-			meteor->size = { 20, 60 };
+			meteor->position = { 0.0f, 0.0f };
+			meteor->angle = 0.0f;
+			meteor->size = { 200, 200 };
 
 			meteor->sprite = App->modRender->addSprite(meteor);
-			meteor->sprite->order = 3;
+			meteor->sprite->order = 5;
 			meteor->sprite->texture = App->modResources->asteroid1;
 
 			Meteorite* meteroriteBehaviour = App->modBehaviour->addMeteorite(meteor);
 			meteroriteBehaviour->isServer = isServer;
+
+			// Create collider
+			gameObject->collider = App->modCollision->addCollider(ColliderType::Meteorite, gameObject);
+			gameObject->collider->isTrigger = true;
 		}
 	}
 }

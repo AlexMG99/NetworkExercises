@@ -108,6 +108,14 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 			go->sprite->order = 3;
 		}
 		break;
+		case BehaviourType::Meteorite:
+		{
+			//laserBehaviour->isServer = false;
+
+			go->sprite->texture = App->modResources->asteroid1;
+			go->sprite->order = 5;
+		}
+		break;
 		case BehaviourType::None:
 		{
 			LOG("No Type");

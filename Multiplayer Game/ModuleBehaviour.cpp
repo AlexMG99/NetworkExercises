@@ -24,6 +24,8 @@ Behaviour *ModuleBehaviour::addBehaviour(BehaviourType behaviourType, GameObject
 		return addSpaceship(parentGameObject);
 	case BehaviourType::Laser:
 		return addLaser(parentGameObject);
+	case BehaviourType::Meteorite:
+		return addMeteorite(parentGameObject);
 	default:
 		return nullptr;
 	}

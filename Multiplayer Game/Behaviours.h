@@ -51,7 +51,7 @@ struct Meteorite : public Behaviour
 {
 	float secondsSinceCreation = 0.0f;
 
-	BehaviourType type() const override { return BehaviourType::Laser; }
+	BehaviourType type() const override { return BehaviourType::Meteorite; }
 
 	void start() override;
 
