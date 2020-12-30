@@ -115,36 +115,41 @@ void ModuleNetworkingClient::onGui()
 		else if (state == ClientState::Game)
 		{
 			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-			Spaceship* spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
-
-			if (!spaceshipBehaviour->isDead)
+			Spaceship* spaceshipBehaviour = nullptr;
+			if (playerGameObject)
+				spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
+		
+			if (spaceshipBehaviour)
 			{
-				playerScore = spaceshipBehaviour->score;
-				ImGui::Text("%s Score: %i		Life: %i ", playerName.c_str(), playerScore, currentHealth);
-			}
-			else if (spaceshipBehaviour->isDead && currentHealth > 0)
-			{
-				if (ImGui::Button("Respawn"))
+				if (!spaceshipBehaviour->isDead)
 				{
-					OutputMemoryStream packet;
-					packet << PROTOCOL_ID;
-					packet << ClientMessage::Respawn;
-
-					sendPacket(packet, serverAddress);
+					playerScore = spaceshipBehaviour->score;
+					ImGui::Text("%s Score: %i		Life: %i ", playerName.c_str(), playerScore, currentHealth);
 				}
-			}
-			else
-			{
-				ImGui::Text("You lost :(");
-
-				if (!isDead)
+				else if (spaceshipBehaviour->isDead && currentHealth > 0)
 				{
-					OutputMemoryStream packet;
-					packet << PROTOCOL_ID;
-					packet << ClientMessage::LostGame;
+					if (ImGui::Button("Respawn"))
+					{
+						OutputMemoryStream packet;
+						packet << PROTOCOL_ID;
+						packet << ClientMessage::Respawn;
 
-					sendPacket(packet, serverAddress);
-					isDead = true;
+						sendPacket(packet, serverAddress);
+					}
+				}
+				else
+				{
+					ImGui::Text("You lost :(");
+
+					if (!isDead)
+					{
+						OutputMemoryStream packet;
+						packet << PROTOCOL_ID;
+						packet << ClientMessage::LostGame;
+
+						sendPacket(packet, serverAddress);
+						isDead = true;
+					}
 				}
 			}
 			

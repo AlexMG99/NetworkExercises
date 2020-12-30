@@ -25,7 +25,6 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 		switch (action)
 		{
 		case ReplicationAction::None:
-			LOG("Action Empty!");
 			break;
 		case ReplicationAction::Create:
 		{

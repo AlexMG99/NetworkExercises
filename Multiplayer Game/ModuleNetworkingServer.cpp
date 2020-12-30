@@ -207,9 +207,14 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			packet << ServerMessage::StartGame;
 			packet << MAX_HEALTH;
 
+			for (ClientProxy& clientProxy : clientProxies)
+			{
+				if (clientProxy.connected)
+				{
+					sendPacket(packet, clientProxy.address);
+				}
+			}
 			StartGame();
-
-			sendPacket(packet, fromAddress);
 		}
 		else if (message == ClientMessage::Disconnected)
 		{
@@ -227,16 +232,6 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			currentHealth--;
 
-			for (ClientProxy& clientProxy : clientProxies)
-			{
-				if (clientProxy.connected)
-				{
-					Spaceship* spaceshipBehaviour = (Spaceship*)clientProxy.gameObject->behaviour;
-					spaceshipBehaviour->Respawn();
-				}
-			}
-
-
 			if (currentHealth >= 0)
 			{
 				OutputMemoryStream packet;
@@ -244,12 +239,22 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				packet << ServerMessage::LostHP;
 				packet << currentHealth;
 				sendPacket(packet, fromAddress);
+
+				for (ClientProxy& clientProxy : clientProxies)
+				{
+					if (clientProxy.connected)
+					{
+						sendPacket(packet, clientProxy.address);
+					}
+				}
 			}
+
+			Spaceship* spaceshipBehaviour = (Spaceship*)proxy->gameObject->behaviour;
+			spaceshipBehaviour->Respawn();
 		}
 		else if (message == ClientMessage::LostHP)
 		{
 
-			
 		}
 		else if (message == ClientMessage::LostGame)
 		{
@@ -260,6 +265,16 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			{
 				if (netGameObjects[i]->behaviour && netGameObjects[i]->behaviour->type() != BehaviourType::Spaceship)
 					NetworkDestroy(netGameObjects[i]);
+			}
+
+			for (ClientProxy& clientProxy : clientProxies)
+			{
+				if (clientProxy.connected)
+				{
+					Spaceship* spaceshipBehaviour = (Spaceship*)clientProxy.gameObject->behaviour;
+					if (spaceshipBehaviour)
+						spaceshipBehaviour->Respawn();
+				}
 			}
 
 			GameObject* lostMsg = NetworkInstantiate();
@@ -550,6 +565,7 @@ void ModuleNetworkingServer::StartGame()
 
 	NetworkDestroy(startMsg, 1.0f);
 
+	currentHealth = MAX_HEALTH;
 	isGame = true;
 }
 

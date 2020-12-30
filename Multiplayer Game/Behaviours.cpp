@@ -146,7 +146,6 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				position = gameObject->position;
 
 				gameObject->position = { 2000,2000 };
-				gameObject->collider->type = ColliderType::None;
 				gameObject->hasTeleported = true;
 
 				isDead = true;
@@ -199,7 +198,6 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				position = gameObject->position;
 
 				gameObject->position = { 2000,2000 };
-				gameObject->collider->type = ColliderType::None;
 				gameObject->hasTeleported = true;
 
 				isDead = true;
@@ -244,7 +242,8 @@ void Spaceship::Respawn()
 	{
 		gameObject->position = { 0,0 };
 		gameObject->collider->type = ColliderType::Player;
-		gameObject->hasTeleported = true;
+		gameObject->hasTeleported = false;
+		//gameObject->networkInterpolationEnabled = true;
 		ResetHealth();
 
 		isDead = false;
