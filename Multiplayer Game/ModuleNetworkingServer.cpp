@@ -1,5 +1,5 @@
 #include "ModuleNetworkingServer.h"
-
+#include <math.h>
 
 
 //////////////////////////////////////////////////////////////////////
@@ -328,6 +328,15 @@ void ModuleNetworkingServer::onUpdate()
 					packet << PROTOCOL_ID;
 					packet << ServerMessage::Ping;
 					sendPacket(packet, clientProxy.address);
+
+					if (totalMeteorites <= 0 && isGame)
+					{
+						OutputMemoryStream packet;
+						packet << PROTOCOL_ID;
+						packet << ServerMessage::FinishGame;
+						WinGame();
+						sendPacket(packet, clientProxy.address);
+					}
 				}
 
 				// Don't let the client proxy point to a destroyed game object
@@ -554,6 +563,11 @@ void ModuleNetworkingServer::StartGame()
 	Meteorite* meteroriteBehaviour = App->modBehaviour->addMeteorite(meteor);
 	meteroriteBehaviour->isServer = isServer();
 
+	for (int i = 0; i <= meteroriteBehaviour->GetMaxLevel(); i++)
+	{
+		totalMeteorites += pow(meteroriteBehaviour->GetDivision(), i);
+	}
+	
 	// Create collider
 	meteor->collider = App->modCollision->addCollider(ColliderType::Meteorite, meteor);
 	meteor->collider->isTrigger = true;
@@ -567,6 +581,19 @@ void ModuleNetworkingServer::StartGame()
 
 	currentHealth = MAX_HEALTH;
 	isGame = true;
+}
+
+void ModuleNetworkingServer::WinGame()
+{
+	isGame = false;
+
+	GameObject* winMsg = NetworkInstantiate();
+	winMsg->sprite = App->modRender->addSprite(winMsg);
+	winMsg->sprite->texture = App->modResources->win;
+	winMsg->sprite->order = 100;
+
+	NetworkDestroy(winMsg, 1.0f);
+
 }
 
 

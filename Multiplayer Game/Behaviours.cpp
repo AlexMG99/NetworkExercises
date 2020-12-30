@@ -185,6 +185,9 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 						meteoriteBehaviour->create(c2.gameObject->position, c2.gameObject->size.x * 0.75f, angle, meteoriteBehaviour->GetSpeed() * 1.25);
 					}
 				}
+
+				App->modNetServer->totalMeteorites--;
+
 				NetworkDestroy(c2.gameObject);
 			}
 
@@ -380,6 +383,8 @@ void Meteorite::onCollisionTriggered(Collider& c1, Collider& c2)
 						create(gameObject->position, gameObject->size.x * 0.75f, angle, speed * 1.25);
 					}
 				}
+				App->modNetServer->totalMeteorites--;
+
 				NetworkDestroy(gameObject);
 			}
 

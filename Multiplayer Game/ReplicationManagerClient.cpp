@@ -170,7 +170,7 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 	}
 	else if (strcmp(fName.c_str(), "win.png") == 0)
 	{
-		//go->sprite->texture = App->modResources->win;
+		go->sprite->texture = App->modResources->win;
 		go->sprite->order = 100;
 	}
 	else if (strcmp(fName.c_str(), "lost.png") == 0)

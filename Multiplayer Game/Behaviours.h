@@ -78,7 +78,7 @@ private:
 
 	int division = 3;
 	int currentLevel = 0;
-	int maxLevel = 3;
+	int maxLevel = 1;
 	float speed = 100.0f;
 };
 

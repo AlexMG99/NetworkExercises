@@ -19,6 +19,7 @@ public:
 	Texture *explosion1 = nullptr;
 	Texture	*start = nullptr;
 	Texture* lost = nullptr;
+	Texture* win = nullptr;
 
 	AnimationClip *explosionClip = nullptr;
 	AnimationClip* spaceship01Clip = nullptr;
