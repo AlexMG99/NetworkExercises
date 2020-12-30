@@ -110,6 +110,7 @@ void ModuleNetworkingClient::onGui()
 				packet << ClientMessage::StartGame;
 
 				sendPacket(packet, serverAddress);
+
 			}
 		}
 		else if (state == ClientState::Game)
@@ -128,27 +129,29 @@ void ModuleNetworkingClient::onGui()
 				}
 				else if (spaceshipBehaviour->isDead && currentHealth > 0)
 				{
-					if (ImGui::Button("Respawn"))
+					if (currentHealth > 1)
 					{
-						OutputMemoryStream packet;
-						packet << PROTOCOL_ID;
-						packet << ClientMessage::Respawn;
+						if (ImGui::Button("Respawn"))
+						{
+							OutputMemoryStream packet;
+							packet << PROTOCOL_ID;
+							packet << ClientMessage::Respawn;
 
-						sendPacket(packet, serverAddress);
+							sendPacket(packet, serverAddress);
+						}
 					}
-				}
-				else
-				{
-					ImGui::Text("You lost :(");
-
-					if (!isDead)
+					else
 					{
-						OutputMemoryStream packet;
-						packet << PROTOCOL_ID;
-						packet << ClientMessage::LostGame;
+						ImGui::Text("You lost :("); ImGui::SameLine();
 
-						sendPacket(packet, serverAddress);
-						isDead = true;
+						if (ImGui::Button("Restart Game"))
+						{
+							OutputMemoryStream packet;
+							packet << PROTOCOL_ID;
+							packet << ClientMessage::LostGame;
+
+							sendPacket(packet, serverAddress);
+						}
 					}
 				}
 			}
@@ -221,8 +224,6 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		else if (message == ServerMessage::Death)
 		{
 			packet >> currentHealth;
-
-			isDead = true;
 			
 			if (currentHealth <= 0)
 			{
