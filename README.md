@@ -67,10 +67,12 @@ object that was created, the first on the list.
 - When disconnecting and reconnecting, we could not get the delivery manager to clean properly. To solve this problem we create a new clear function to correctly clean the delivery manager.
 
 **Improving latency handling**
-- **Client side prediction** (Alex Morales)  Achieved with some bugs.
+- **Client side prediction** (Alex Morales)  Completely achieved.
+
 It processes inputs in real time from the player and when we receive the package with the position it should be in and the input it stayed in, we undo these inputs from the client and apply those from the server, to have the same position in both. 
 A problem that arose in this section was that the inputdatafrom gave us a negative value. We solved it with a check that prevents negative values ​​from being processed.
 - **Entity interpolation** (Alex Morales, Alejandro París, Laia Martínez) Completely achieved.
+
 -From the client's point it interpolates the position, starting from the one received in the previous packet and the one received in the current one. In order to make the movement feel better. 
 The problem we found in this section was the ignorance of the existence of the variable has interpolatedenable
 and therefore in the client we did not pass the position correctly and in the game it was out of square.
