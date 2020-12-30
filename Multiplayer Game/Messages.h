@@ -7,6 +7,7 @@ enum class ClientMessage : uint8
 	Ping,   // NOTE(jesus): Use this message type in the virtual connection lab session
 	Replication,
 	StartGame,
+	Disconnected,
 	LostHP
 };
 

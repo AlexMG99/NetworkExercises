@@ -135,6 +135,8 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				welcomePacket << ServerMessage::Welcome;
 				welcomePacket << proxy->clientId;
 				welcomePacket << proxy->gameObject->networkId;
+				welcomePacket << isGame;
+				welcomePacket << SendScore(proxy->name.c_str());
 				sendPacket(welcomePacket, fromAddress);
 
 				// Send all network objects to the new player
@@ -208,6 +210,18 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			StartGame();
 
 			sendPacket(packet, fromAddress);
+		}
+		else if (message == ClientMessage::Disconnected)
+		{
+			int playerScore;
+			packet >> playerScore;
+			std::string playerName;
+			packet >> playerName;
+
+			if (!isScoreRegistered(playerName.c_str(), playerScore))
+			{
+				score_players.insert(std::pair<std::string, int>(playerName, playerScore));
+			}
 		}
 		else if (message == ClientMessage::LostHP)
 		{
@@ -388,6 +402,31 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
     *clientProxy = {};
 }
 
+bool ModuleNetworkingServer::isScoreRegistered(const char* name, int score)
+{
+	for (auto it_map = score_players.begin(); it_map != score_players.end();)
+	{
+		if (strcmp((*it_map).first.c_str(), name) == 0)
+		{
+			(*it_map).second = score;
+			return true;
+		}
+	}
+	return false;
+}
+
+int ModuleNetworkingServer::SendScore(const char* name)
+{
+	for (auto it_map = score_players.begin(); it_map != score_players.end();)
+	{
+		if (strcmp((*it_map).first.c_str(), name) == 0)
+		{
+			return (*it_map).second;
+		}
+	}
+	return 0;
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // Spawning
@@ -464,6 +503,8 @@ void ModuleNetworkingServer::StartGame()
 	startMsg->sprite->order = 100;
 
 	NetworkDestroy(startMsg, 1.0f);
+
+	isGame = true;
 }
 
 

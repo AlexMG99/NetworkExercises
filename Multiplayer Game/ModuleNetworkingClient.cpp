@@ -117,7 +117,8 @@ void ModuleNetworkingClient::onGui()
 			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
 			if (playerGameObject != nullptr) {
 				Spaceship* spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
-				ImGui::Text("%s Score: %i", playerName.c_str(), spaceshipBehaviour->score);
+				playerScore = spaceshipBehaviour->score;
+				ImGui::Text("%s Score: %i", playerName.c_str(), playerScore);
 			}
 			
 		}
@@ -142,9 +143,15 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			packet >> playerId;
 			packet >> networkId;
+			bool isGame;
+			packet >> isGame;
+			packet >> playerScore;
 
 			LOG("ModuleNetworkingClient::onPacketReceived() - Welcome from server");
-			state = ClientState::Connected;
+			if (isGame)
+				state = ClientState::Game;
+			else
+				state = ClientState::Connected;
 		}
 		else if (message == ServerMessage::Unwelcome)
 		{
@@ -338,4 +345,12 @@ void ModuleNetworkingClient::onDisconnect()
 
 	deliveryManager.clear();
 	App->modRender->cameraPosition = {};
+
+	OutputMemoryStream packet;
+	packet << PROTOCOL_ID;
+	packet << ClientMessage::Disconnected;
+	packet << playerScore;
+	packet << playerName;
+
+	sendPacket(packet, serverAddress);
 }

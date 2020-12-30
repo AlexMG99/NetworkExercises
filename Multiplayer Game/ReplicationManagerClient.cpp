@@ -64,7 +64,6 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			GameObject* GO = App->modLinkingContext->getNetworkGameObject(networkId);
 			if (GO)
 			{
-
 				App->modLinkingContext->unregisterNetworkGameObject(GO);
 				App->modGameObject->Destroy(GO);
 			}

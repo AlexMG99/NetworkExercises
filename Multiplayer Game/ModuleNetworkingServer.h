@@ -76,6 +76,13 @@ private:
 	int currentHealth = 3;
 	int MAX_HEALTH = 3;
 
+	bool isGame = false;
+
+	bool isScoreRegistered(const char* name, int score);
+	int SendScore(const char* name);
+
+	std::unordered_map<std::string, int> score_players;
+
 
 public:
 
