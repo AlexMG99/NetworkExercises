@@ -178,7 +178,7 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 					packet >> inputData.buttonBits;
 
 					if (inputData.sequenceNumber >= proxy->nextExpectedInputSequenceNumber 
-						&& inputData.sequenceNumber > proxy->lastInputSequenceNumber)
+						/*&& inputData.sequenceNumber > proxy->lastInputSequenceNumber*/)
 					{
 						proxy->gamepad.horizontalAxis = inputData.horizontalAxis;
 						proxy->gamepad.verticalAxis = inputData.verticalAxis;
@@ -327,8 +327,15 @@ void ModuleNetworkingServer::onDisconnect()
 	{
 		destroyClientProxy(&clientProxy);
 	}
+
+	for (DelayedDestroyEntry& destroyEntry : netGameObjectsToDestroyWithDelay)
+	{
+		destroyEntry.delaySeconds = 0.0f;
+		destroyEntry.object = nullptr;
+	}
 	
 	nextClientId = 0;
+	secondsSinceLastPing = 0;
 
 	state = ServerState::Stopped;
 }
@@ -375,6 +382,8 @@ void ModuleNetworkingServer::destroyClientProxy(ClientProxy *clientProxy)
 	{
 		destroyNetworkObject(clientProxy->gameObject);
 	}
+
+	clientProxy->deliveryManager.clear();
 
     *clientProxy = {};
 }

@@ -22,7 +22,7 @@ bool DeliveryManager::processSequenceNumber(const InputMemoryStream& packet)
 	packet >> sequenceNumber;
 
 	// Check seq number in order
-	if (sequenceNumber == nextExpectedSequenceNumber)
+	if (sequenceNumber >= nextExpectedSequenceNumber)
 	{
 		pendingAck.push_back(sequenceNumber);
 		nextExpectedSequenceNumber++;
@@ -77,6 +77,21 @@ void DeliveryManager::processTimedOutPackets()
 		else
 			++it;
 	}
+}
+
+void DeliveryManager::clear()
+{
+	nextSequenceNumber = 0;
+
+	for (std::vector<Delivery*>::iterator it = pendingDeliveries.begin(); it != pendingDeliveries.end(); ++it)
+	{
+		(*it)->clear();
+		delete (*it);
+	}
+	pendingDeliveries.clear();
+
+	nextExpectedSequenceNumber = 0;
+	pendingAck.clear();
 }
 
 RepDeliveryDelegate::RepDeliveryDelegate(ReplicationManagerServer* repManager)

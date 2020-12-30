@@ -223,7 +223,7 @@ void ModuleNetworkingClient::onUpdate()
 			sendPacket(packet, serverAddress);
 		}
 	}
-	else if (state == ClientState::Connected)
+	else if (state == ClientState::Connected || state == ClientState::Game)
 	{
 		// Increae time to secondsSinceLastPackage
 		secondsSinceLastPackage += Time.deltaTime;
@@ -336,5 +336,6 @@ void ModuleNetworkingClient::onDisconnect()
 		Destroy(networkGameObjects[i]);
 	}
 
+	deliveryManager.clear();
 	App->modRender->cameraPosition = {};
 }
