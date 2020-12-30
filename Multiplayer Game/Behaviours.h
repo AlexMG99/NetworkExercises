@@ -117,5 +117,8 @@ struct Spaceship : public Behaviour
 	void SetAdvanceSpeed(float spd) { advanceSpeed = spd; }
 	void SetRotateSpeed(float spd) { rotateSpeed = spd; }
 	void SetMaxHealth(int hp) { MAX_HIT_POINTS = hp; hitPoints = MAX_HIT_POINTS; }
+	void ResetHealth() { hitPoints = MAX_HIT_POINTS; }
 	void AddScore(int scr) { score += scr; }
+
+	void Respawn();
 };

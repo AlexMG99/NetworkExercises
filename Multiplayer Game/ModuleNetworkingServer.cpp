@@ -225,27 +225,32 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 		}
 		else if (message == ClientMessage::Respawn)
 		{
-			if (proxy != nullptr)
-			{
-				uint8 spaceshipType;
-				packet >> spaceshipType;
-
-				// Create new network object
-				vec2 initialPosition = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
-				float initialAngle = 360.0f * Random.next();
-				proxy->gameObject = spawnPlayer(spaceshipType, initialPosition, initialAngle);
-			}
-		}
-		/*else if (message == ClientMessage::LostHP)
-		{
 			currentHealth--;
 
-			OutputMemoryStream hpLost;
-			hpLost << PROTOCOL_ID;
-			hpLost << ServerMessage::LostHP;
-			hpLost << currentHealth;
-			sendPacket(hpLost, fromAddress);
-		}*/
+			for (ClientProxy& clientProxy : clientProxies)
+			{
+				if (clientProxy.connected)
+				{
+					Spaceship* spaceshipBehaviour = (Spaceship*)clientProxy.gameObject->behaviour;
+					spaceshipBehaviour->Respawn();
+				}
+			}
+
+
+			if (currentHealth >= 0)
+			{
+				OutputMemoryStream packet;
+				packet << PROTOCOL_ID;
+				packet << ServerMessage::LostHP;
+				packet << currentHealth;
+				sendPacket(packet, fromAddress);
+			}
+		}
+		else if (message == ClientMessage::LostHP)
+		{
+
+			
+		}
 		else if (message == ClientMessage::LostGame)
 		{
 			uint16 netGameObjectsCount;
@@ -589,9 +594,6 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 
 void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 {
-	if (gameObject->behaviour && gameObject->behaviour->type() == BehaviourType::Spaceship)
-		currentHealth--;
-
 	// Notify all client proxies' replication manager to destroy the object remotely
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -599,16 +601,6 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		{
 			// TODO(you): World state replication lab session
 			clientProxies[i].repManagerServer.destroy(gameObject->networkId);
-
-			if (gameObject->behaviour && gameObject->behaviour->type() == BehaviourType::Spaceship)
-			{
-				OutputMemoryStream packet;
-				packet << PROTOCOL_ID;
-				packet << ServerMessage::Death;
-				packet << currentHealth;
-
-				sendPacket(packet, clientProxies[i].address);
-			}
 		}
 	}
 

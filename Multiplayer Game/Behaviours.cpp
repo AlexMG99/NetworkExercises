@@ -104,6 +104,8 @@ void Spaceship::update()
 	lifebar->position = gameObject->position + vec2{ -50.0f, -50.0f };
 	lifebar->size = vec2{ lifeRatio * 80.0f, 5.0f };
 	lifebar->sprite->color = lerp(colorDead, colorAlive, lifeRatio);
+
+	
 }
 
 void Spaceship::destroy()
@@ -143,22 +145,15 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				size = 250.0f + 100.0f * Random.next();
 				position = gameObject->position;
 
-				NetworkDestroy(gameObject);
+				gameObject->position = { 2000,2000 };
+				gameObject->collider->type = ColliderType::None;
+				gameObject->hasTeleported = true;
+
+				isDead = true;
+				//NetworkDestroy(gameObject);
 			}
 
-			GameObject *explosion = NetworkInstantiate();
-			explosion->position = position;
-			explosion->size = vec2{ size, size };
-			explosion->angle = 365.0f * Random.next();
-
-			explosion->sprite = App->modRender->addSprite(explosion);
-			explosion->sprite->texture = App->modResources->explosion1;
-			explosion->sprite->order = 100;
-
-			explosion->animation = App->modRender->addAnimation(explosion);
-			explosion->animation->clip = App->modResources->explosionClip;
-
-			NetworkDestroy(explosion, 2.0f);
+			CreateExplotion(position, size);
 
 			// NOTE(jesus): Only played in the server right now...
 			// You need to somehow make this happen in clients
@@ -203,7 +198,13 @@ void Spaceship::onCollisionTriggered(Collider &c1, Collider &c2)
 				size = 250.0f + 100.0f * Random.next();
 				position = gameObject->position;
 
-				NetworkDestroy(gameObject);
+				gameObject->position = { 2000,2000 };
+				gameObject->collider->type = ColliderType::None;
+				gameObject->hasTeleported = true;
+
+				isDead = true;
+
+				//NetworkDestroy(gameObject);
 			}
 
 			CreateExplotion(position, size);
@@ -224,6 +225,7 @@ void Spaceship::write(OutputMemoryStream & packet)
 	packet << rotateSpeed;
 	packet << MAX_HIT_POINTS;
 	packet << score;
+	packet << isDead;
 }
 
 void Spaceship::read(const InputMemoryStream & packet)
@@ -233,6 +235,24 @@ void Spaceship::read(const InputMemoryStream & packet)
 	packet >> rotateSpeed;
 	packet >> MAX_HIT_POINTS;
 	packet >> score;
+	packet >> isDead;
+}
+
+void Spaceship::Respawn()
+{
+	if (isServer)
+	{
+		gameObject->position = { 0,0 };
+		gameObject->collider->type = ColliderType::Player;
+		gameObject->hasTeleported = true;
+		ResetHealth();
+
+		isDead = false;
+
+		secondsSinceHit = 0.0f;
+
+		NetworkUpdate(gameObject);
+	}
 }
 
 void Meteorite::create(vec2 spawnPos, float size, float ang, float speed)
@@ -272,12 +292,7 @@ void Meteorite::update()
 	{
 		const float neutralTimeSeconds = 0.1f;
 		if (secondsSinceCreation > neutralTimeSeconds&& gameObject->collider == nullptr) {
-			gameObject->collider = App->modCollision->addCollider(ColliderType::Laser, gameObject);
-		}
-
-		const float lifetimeSeconds = 2.0f;
-		if (secondsSinceCreation >= lifetimeSeconds) {
-			NetworkDestroy(gameObject);
+			gameObject->collider = App->modCollision->addCollider(ColliderType::Meteorite, gameObject);
 		}
 
 		float mid_w = Window.width * 0.5f;

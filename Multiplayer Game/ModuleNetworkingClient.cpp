@@ -115,26 +115,36 @@ void ModuleNetworkingClient::onGui()
 		else if (state == ClientState::Game)
 		{
 			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-			if (!isDead)
+			Spaceship* spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
+
+			if (!spaceshipBehaviour->isDead)
 			{
-				if (playerGameObject != nullptr) {
-					Spaceship* spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
-					playerScore = spaceshipBehaviour->score;
-					ImGui::Text("%s Score: %i		Life: %i ", playerName.c_str(), playerScore, currentHealth);
-				}
+				playerScore = spaceshipBehaviour->score;
+				ImGui::Text("%s Score: %i		Life: %i ", playerName.c_str(), playerScore, currentHealth);
 			}
-			else if (currentHealth > 0)
+			else if (spaceshipBehaviour->isDead && currentHealth > 0)
 			{
 				if (ImGui::Button("Respawn"))
 				{
 					OutputMemoryStream packet;
 					packet << PROTOCOL_ID;
 					packet << ClientMessage::Respawn;
-					packet << spaceshipType;
 
 					sendPacket(packet, serverAddress);
+				}
+			}
+			else
+			{
+				ImGui::Text("You lost :(");
 
-					isDead = false;
+				if (!isDead)
+				{
+					OutputMemoryStream packet;
+					packet << PROTOCOL_ID;
+					packet << ClientMessage::LostGame;
+
+					sendPacket(packet, serverAddress);
+					isDead = true;
 				}
 			}
 			
@@ -207,7 +217,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		{
 			packet >> currentHealth;
 
-			//isDead = true;
+			isDead = true;
 			
 			if (currentHealth <= 0)
 			{
@@ -216,10 +226,6 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 				packet << ClientMessage::LostGame;
 				sendPacket(packet, fromAddress);
 			}
-			else
-				disconnect();
-
-
 		}
 		else if (message == ServerMessage::StartGame)
 		{
@@ -231,6 +237,10 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 		else if (message == ServerMessage::FinishGame)
 		{
 			state = ClientState::Connected;
+		}
+		else if (message == ServerMessage::LostHP)
+		{
+			packet >> currentHealth;
 		}
 		
 	}
