@@ -163,6 +163,7 @@ bool ModuleNetworking::gui()
 		ImGui::Begin("ModuleNetworking window");
 		
 		ImGui::Text(" - Current time: %f", Time.time);
+		ImGui::Text(" - Real current time: %f", ImGui::GetTime());
 		ImGui::Text(" - # Packet sent: %u", sentPacketsCount);
 		ImGui::Text(" - # Packet received: %u", receivedPacketsCount);
 
