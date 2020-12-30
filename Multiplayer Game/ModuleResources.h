@@ -18,6 +18,7 @@ public:
 	Texture *laser = nullptr;
 	Texture *explosion1 = nullptr;
 	Texture	*start = nullptr;
+	Texture* lost = nullptr;
 
 	AnimationClip *explosionClip = nullptr;
 	AnimationClip* spaceship01Clip = nullptr;

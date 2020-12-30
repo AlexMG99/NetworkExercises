@@ -115,11 +115,29 @@ void ModuleNetworkingClient::onGui()
 		else if (state == ClientState::Game)
 		{
 			GameObject* playerGameObject = App->modLinkingContext->getNetworkGameObject(networkId);
-			if (playerGameObject != nullptr) {
-				Spaceship* spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
-				playerScore = spaceshipBehaviour->score;
-				ImGui::Text("%s Score: %i", playerName.c_str(), playerScore);
+			if (!isDead)
+			{
+				if (playerGameObject != nullptr) {
+					Spaceship* spaceshipBehaviour = (Spaceship*)playerGameObject->behaviour;
+					playerScore = spaceshipBehaviour->score;
+					ImGui::Text("%s Score: %i		Life: %i ", playerName.c_str(), playerScore, currentHealth);
+				}
 			}
+			else if (currentHealth > 0)
+			{
+				if (ImGui::Button("Respawn"))
+				{
+					OutputMemoryStream packet;
+					packet << PROTOCOL_ID;
+					packet << ClientMessage::Respawn;
+					packet << spaceshipType;
+
+					sendPacket(packet, serverAddress);
+
+					isDead = false;
+				}
+			}
+			
 			
 		}
 		ImGui::End();
@@ -177,7 +195,7 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 				InputController prevController;
 				prevController = inputControllerFromInputPacketData(inputData[inputDataFront % ArrayCount(inputData)], prevController);
 
-				for (int i = inputDataFront + 1; i < inputDataBack; ++i)
+				for (int i = inputDataFront + 1; i < inputDataBack; i++)
 				{
 					prevController = inputControllerFromInputPacketData(inputData[i % ArrayCount(inputData)], prevController);
 					playerGameObject->behaviour->onInput(prevController);
@@ -185,14 +203,23 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 
 			}
 		}
-		else if (message == ServerMessage::LostHP)
+		else if (message == ServerMessage::Death)
 		{
 			packet >> currentHealth;
+
+			//isDead = true;
 			
 			if (currentHealth <= 0)
 			{
-				// Disconnect
+				OutputMemoryStream packet;
+				packet << PROTOCOL_ID;
+				packet << ClientMessage::LostGame;
+				sendPacket(packet, fromAddress);
 			}
+			else
+				disconnect();
+
+
 		}
 		else if (message == ServerMessage::StartGame)
 		{
@@ -200,6 +227,10 @@ void ModuleNetworkingClient::onPacketReceived(const InputMemoryStream &packet, c
 			currentHealth = MAX_HEALTH;
 
 			state = ClientState::Game;
+		}
+		else if (message == ServerMessage::FinishGame)
+		{
+			state = ClientState::Connected;
 		}
 		
 	}

@@ -24,6 +24,9 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 
 		switch (action)
 		{
+		case ReplicationAction::None:
+			LOG("Action Empty!");
+			break;
 		case ReplicationAction::Create:
 		{
 			GameObject* GO = App->modGameObject->Instantiate();
@@ -164,6 +167,16 @@ void ReplicationManagerClient::createObject(const InputMemoryStream& packet, Gam
 	else if (strcmp(fName.c_str(), "start.png") == 0)
 	{
 		go->sprite->texture = App->modResources->start;
+		go->sprite->order = 100;
+	}
+	else if (strcmp(fName.c_str(), "win.png") == 0)
+	{
+		//go->sprite->texture = App->modResources->win;
+		go->sprite->order = 100;
+	}
+	else if (strcmp(fName.c_str(), "lost.png") == 0)
+	{
+		go->sprite->texture = App->modResources->lost;
 		go->sprite->order = 100;
 	}
 	

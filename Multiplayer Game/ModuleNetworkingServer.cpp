@@ -223,7 +223,20 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 				score_players.insert(std::pair<std::string, int>(playerName, playerScore));
 			}
 		}
-		else if (message == ClientMessage::LostHP)
+		else if (message == ClientMessage::Respawn)
+		{
+			if (proxy != nullptr)
+			{
+				uint8 spaceshipType;
+				packet >> spaceshipType;
+
+				// Create new network object
+				vec2 initialPosition = 500.0f * vec2{ Random.next() - 0.5f, Random.next() - 0.5f };
+				float initialAngle = 360.0f * Random.next();
+				proxy->gameObject = spawnPlayer(spaceshipType, initialPosition, initialAngle);
+			}
+		}
+		/*else if (message == ClientMessage::LostHP)
 		{
 			currentHealth--;
 
@@ -232,6 +245,31 @@ void ModuleNetworkingServer::onPacketReceived(const InputMemoryStream &packet, c
 			hpLost << ServerMessage::LostHP;
 			hpLost << currentHealth;
 			sendPacket(hpLost, fromAddress);
+		}*/
+		else if (message == ClientMessage::LostGame)
+		{
+			uint16 netGameObjectsCount;
+			GameObject* netGameObjects[MAX_NETWORK_OBJECTS];
+			App->modLinkingContext->getNetworkGameObjects(netGameObjects, &netGameObjectsCount);
+			for (uint32 i = 0; i < netGameObjectsCount; ++i)
+			{
+				if (netGameObjects[i]->behaviour && netGameObjects[i]->behaviour->type() != BehaviourType::Spaceship)
+					NetworkDestroy(netGameObjects[i]);
+			}
+
+			GameObject* lostMsg = NetworkInstantiate();
+			lostMsg->sprite = App->modRender->addSprite(lostMsg);
+			lostMsg->sprite->texture = App->modResources->lost;
+			lostMsg->sprite->order = 100;
+
+			NetworkDestroy(lostMsg, 1.0f);
+
+			isGame = false;
+
+			OutputMemoryStream packet;
+			packet << PROTOCOL_ID;
+			packet << ServerMessage::FinishGame;
+			sendPacket(packet, fromAddress);
 		}
 
 	}
@@ -284,7 +322,10 @@ void ModuleNetworkingServer::onUpdate()
 					OutputMemoryStream packet;
 					packet << PROTOCOL_ID;
 					packet << ServerMessage::Replication;
-					packet << clientProxy.nextExpectedInputSequenceNumber - 1;
+					if(clientProxy.nextExpectedInputSequenceNumber != 0)
+						packet << clientProxy.nextExpectedInputSequenceNumber - 1;
+					else
+						packet << clientProxy.nextExpectedInputSequenceNumber;
 					Delivery* delivery = clientProxy.deliveryManager.writeSequenceNumber(packet);
 
 					if (delivery)
@@ -455,7 +496,7 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 		// Set Stats Speed
 		spaceshipBehaviour->SetAdvanceSpeed(300.0f);
 		spaceshipBehaviour->SetRotateSpeed(360.0f);
-		spaceshipBehaviour->SetMaxHealth(4);
+		spaceshipBehaviour->SetMaxHealth(1);
 	}
 	else if (spaceshipType == 1) {
 		gameObject->sprite->texture = App->modResources->spacecraft2;
@@ -548,6 +589,9 @@ void ModuleNetworkingServer::updateNetworkObject(GameObject * gameObject)
 
 void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 {
+	if (gameObject->behaviour && gameObject->behaviour->type() == BehaviourType::Spaceship)
+		currentHealth--;
+
 	// Notify all client proxies' replication manager to destroy the object remotely
 	for (int i = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -555,6 +599,16 @@ void ModuleNetworkingServer::destroyNetworkObject(GameObject * gameObject)
 		{
 			// TODO(you): World state replication lab session
 			clientProxies[i].repManagerServer.destroy(gameObject->networkId);
+
+			if (gameObject->behaviour && gameObject->behaviour->type() == BehaviourType::Spaceship)
+			{
+				OutputMemoryStream packet;
+				packet << PROTOCOL_ID;
+				packet << ServerMessage::Death;
+				packet << currentHealth;
+
+				sendPacket(packet, clientProxies[i].address);
+			}
 		}
 	}
 

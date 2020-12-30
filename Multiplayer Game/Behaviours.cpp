@@ -92,14 +92,6 @@ void Spaceship::onInput(const InputController &input)
 			laser->tag = gameObject->tag;
 		}
 	}
-
-	if (input.start == ButtonState::Press)
-	{
-		if (isServer)
-		{
-			
-		}
-	}
 }
 
 void Spaceship::update()

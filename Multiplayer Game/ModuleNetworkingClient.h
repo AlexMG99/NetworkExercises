@@ -75,6 +75,8 @@ private:
 	float secondsSinceLastPackage = 0.0f;
 	float secondsSinceLastPing = 0.0f;
 
+	bool isDead = false;
+
 
 	// Input ///////////
 
