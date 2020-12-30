@@ -523,9 +523,9 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 		gameObject->animation->clip = App->modResources->spaceship01Clip;
 
 		// Set Stats Speed
-		spaceshipBehaviour->SetAdvanceSpeed(300.0f);
-		spaceshipBehaviour->SetRotateSpeed(360.0f);
-		spaceshipBehaviour->SetMaxHealth(1);
+		spaceshipBehaviour->SetAdvanceSpeed(500.0f);
+		spaceshipBehaviour->SetRotateSpeed(600.0f);
+		spaceshipBehaviour->SetMaxHealth(4);
 	}
 	else if (spaceshipType == 1) {
 		gameObject->sprite->texture = App->modResources->spacecraft2;
@@ -533,8 +533,8 @@ GameObject * ModuleNetworkingServer::spawnPlayer(uint8 spaceshipType, vec2 initi
 		gameObject->animation->clip = App->modResources->spaceship02Clip;
 
 		// Set Stats Tank
-		spaceshipBehaviour->SetAdvanceSpeed(150.0f);
-		spaceshipBehaviour->SetRotateSpeed(200.0f);
+		spaceshipBehaviour->SetAdvanceSpeed(300.0f);
+		spaceshipBehaviour->SetRotateSpeed(360.0f);
 		spaceshipBehaviour->SetMaxHealth(7);
 	}
 

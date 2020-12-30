@@ -71,6 +71,8 @@ void ReplicationManagerClient::read(const InputMemoryStream& packet)
 			}
 		}
 		break;
+	deafault:
+		break;
 		}
 	}
 }

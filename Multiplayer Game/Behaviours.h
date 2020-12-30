@@ -78,8 +78,8 @@ private:
 
 	int division = 3;
 	int currentLevel = 0;
-	int maxLevel = 1;
-	float speed = 100.0f;
+	int maxLevel = 4;
+	float speed = 160.0f;
 };
 
 
@@ -90,6 +90,8 @@ struct Spaceship : public Behaviour
 
 	float advanceSpeed = 200.0f;
 	float rotateSpeed = 180.0f;
+	float shootCoolDown = 0.2f;
+	float timeSinceShot = 0.0f;
 
 	float secondsSinceHit = 0.0f;
 

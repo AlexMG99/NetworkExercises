@@ -72,7 +72,7 @@ void Spaceship::onInput(const InputController &input)
 		}
 	}
 
-	if (input.actionLeft == ButtonState::Press)
+	if (input.actionLeft == ButtonState::Press && (timeSinceShot > shootCoolDown))
 	{
 		if (isServer)
 		{
@@ -90,6 +90,8 @@ void Spaceship::onInput(const InputController &input)
 			laserBehaviour->isServer = isServer;
 
 			laser->tag = gameObject->tag;
+
+			timeSinceShot = 0.0f;
 		}
 	}
 }
@@ -97,6 +99,7 @@ void Spaceship::onInput(const InputController &input)
 void Spaceship::update()
 {
 	secondsSinceHit += Time.deltaTime;
+	timeSinceShot += Time.deltaTime;
 
 	static const vec4 colorAlive = vec4{ 0.2f, 1.0f, 0.1f, 0.5f };
 	static const vec4 colorDead = vec4{ 1.0f, 0.2f, 0.1f, 0.5f };
